@@ -2,6 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
+#include <QTextEdit>
+#include <QLabel>
+#include <QApplication>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -22,5 +27,14 @@ private slots:
     void NewFile();
     void OpenFile();
     void SaveFile();
+    void NewFile_Create();
+    void NewFile_Cancel();
+
+private:
+    QString path_file;
+    QLabel* name_file;
+    QTextEdit* edit_code;
+    QMainWindow* mw_newfile;
+    QLineEdit* edit_name;
 };
 #endif // MAINWINDOW_H
