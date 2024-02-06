@@ -17,13 +17,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-public slots:
+private slots:
     void Run();
     void NewFile();
     void OpenFile();
     void SaveFile();
-
-private:
-    Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H
