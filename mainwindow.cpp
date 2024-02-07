@@ -126,7 +126,7 @@ void MainWindow::SaveFile()
 
 void MainWindow::NewFile_Create()
 {
-    delete mw_newfile;
+    mw_newfile->delete Later();
 
     QString name_new_file = edit_name->displayText();
     if(name_new_file.size() < 1) name_new_file = "Application";
@@ -139,5 +139,5 @@ void MainWindow::NewFile_Create()
 
 void MainWindow::NewFile_Cancel()
 {
-    delete mw_newfile;
+    mw_newfile->delete Later();
 }
