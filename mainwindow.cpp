@@ -126,7 +126,7 @@ void MainWindow::SaveFile()
 
 void MainWindow::NewFile_Create()
 {
-    mw_newfile->delete Later();
+    mw_newfile->deleteLater();
 
     QString name_new_file = edit_name->displayText();
     if(name_new_file.size() < 1) name_new_file = "Application";
@@ -134,10 +134,10 @@ void MainWindow::NewFile_Create()
                        + name_new_file + "</span></p></body></html>");
     edit_code->clear();
 
-    path_file = "D:/proga/" + name_new_file + ".cpp";
+    path_file = "D:/" + name_new_file + ".cpp";
 }
 
 void MainWindow::NewFile_Cancel()
 {
-    mw_newfile->delete Later();
+    mw_newfile->deleteLater();
 }
