@@ -36,5 +36,7 @@ private:
     QTextEdit* edit_code;
     QMainWindow* mw_newfile;
     QLineEdit* edit_name;
+
+    QString Name();
 };
 #endif // MAINWINDOW_H

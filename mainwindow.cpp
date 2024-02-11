@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -46,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent)
     edit_code = new QTextEdit(this);
     name_file->setGeometry(20, 25, 700, 35);
     edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 20, qApp->primaryScreen()->availableGeometry().height() - 94);
+
+    name_file->setStyleSheet("font-size:10pt; font-weight: 550;");
+    edit_code->setStyleSheet("font-size:9pt; font-weight: 350;");
 }
 
 MainWindow::~MainWindow()
@@ -56,6 +60,30 @@ MainWindow::~MainWindow()
 void MainWindow::Run()
 {
     SaveFile();
+
+    if(path_file.size() < 1) return;
+    this->setEnabled(false);
+
+    QString name_cpp = Name();
+    qint8 i;
+    for(auto rit = name_cpp.begin(); *rit != '.'; rit++, i++);
+    name_cpp = name_cpp.left(i);
+    name_cpp = "D:/EditCode/file/" + name_cpp + ".exe";
+
+    QProcess myProcess(this);
+    QStringList compilation;
+
+    compilation << "/C" << "g++" << path_file << "-o" << name_cpp;
+    myProcess.start("cmd", compilation);
+    myProcess.waitForFinished();
+
+    compilation.clear();
+
+    compilation << "/C" << "start" << name_cpp;
+    myProcess.start("cmd", compilation);
+    myProcess.waitForFinished();
+
+    this->setEnabled(true);
 }
 
 void MainWindow::NewFile()
@@ -73,7 +101,7 @@ void MainWindow::NewFile()
     QPushButton* cancel = new QPushButton(mw_newfile);
 
     text_name->setText("Name File:");
-    edit_name->setText("main");
+    edit_name->setText("Application");
     create->setText("Create");
     cancel->setText("Cancel");
 
@@ -82,6 +110,8 @@ void MainWindow::NewFile()
     create->setGeometry(30, 60, 75, 30);
     cancel->setGeometry(155, 60, 75, 30);
 
+    this->setEnabled(false);
+    mw_newfile->setEnabled(true);
     mw_newfile->show();
 
     connect(create, &QPushButton::pressed, this, &MainWindow::NewFile_Create);
@@ -93,17 +123,14 @@ void MainWindow::OpenFile()
     SaveFile();
 
     path_file = QFileDialog::getOpenFileName(this, "Open file", "::/images/icon.png", "cpp file (*.cpp)");
-    if(!(path_file.size() > 0)) return;
+    if(path_file.size() < 1) return;
 
-    qint8 i;
-    for(auto rit = path_file.rbegin(); *rit != '/'; rit++, i++);
-    name_file->setText ("<html><head/><body><p><span style=\" font-size:10pt; font-weight:550;\">"
-                       + path_file.right(i) + "</span></p></body></html>");
+    name_file->setText (Name());
 
     QFile file(path_file);
     if (!file.open(QIODevice::ReadOnly))
     {
-        name_file->setText("<html><head/><body><p><span style=\" font-size:10pt; font-weight:550;\">Not open file</span></p></body></html>");
+        name_file->setText("Not open file");
         return;
     }
     edit_code->setText (QString(file.readAll()));
@@ -117,7 +144,7 @@ void MainWindow::SaveFile()
     QFile file(path_file);
     if (!file.open(QIODevice::WriteOnly))
     {
-        name_file->setText("<html><head/><body><p><span style=\" font-size:10pt; font-weight:550;\">Not save file</span></p></body></html>");
+        name_file->setText("Not save file");
         return;
     }
     file.write((edit_code->toPlainText()).toUtf8());
@@ -126,18 +153,29 @@ void MainWindow::SaveFile()
 
 void MainWindow::NewFile_Create()
 {
-    mw_newfile->deleteLater();
-
-    QString name_new_file = edit_name->displayText();
+    QString name_new_file = edit_name->displayText();    
     if(name_new_file.size() < 1) name_new_file = "Application";
-    name_file->setText ("<html><head/><body><p><span style=\" font-size:10pt; font-weight:550;\">"
-                       + name_new_file + "</span></p></body></html>");
+
+    name_file->setText (name_new_file);
     edit_code->clear();
 
-    path_file = "D:/" + name_new_file + ".cpp";
+    path_file = "D:/EditCode/file/" + name_new_file + ".cpp";
+
+    mw_newfile->deleteLater();
+    edit_name->deleteLater();
+    this->setEnabled(true);
 }
 
 void MainWindow::NewFile_Cancel()
 {
     mw_newfile->deleteLater();
+    edit_name->deleteLater();
+    this->setEnabled(true);
+}
+
+QString MainWindow::Name()
+{
+    qint8 i;
+    for(auto rit = path_file.rbegin(); *rit != '/'; rit++, i++);
+    return path_file.right(i);
 }
