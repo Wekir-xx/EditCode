@@ -13,6 +13,19 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    QProcess myProcess(this);
+    QStringList compilation;
+
+    compilation << "/C" << "mkdir" << "C:\\EditCode";
+    myProcess.start("cmd", compilation);
+    myProcess.waitForFinished();
+
+    compilation.clear();
+
+    compilation << "/C" << "mkdir" << "C:\\EditCode\\file";
+    myProcess.start("cmd", compilation);
+    myProcess.waitForFinished();
+
     this->setWindowTitle("EditCode");
     this->setWindowIcon(QIcon(":/images/icon.png"));
     menuBar()->setStyleSheet("background-color: #D3D3D3");
@@ -65,10 +78,10 @@ void MainWindow::Run()
     this->setEnabled(false);
 
     QString name_cpp = Name();
-    qint8 i;
+    qint8 i = 0;
     for(auto rit = name_cpp.begin(); *rit != '.'; rit++, i++);
     name_cpp = name_cpp.left(i);
-    name_cpp = "D:/EditCode/file/" + name_cpp + ".exe";
+    name_cpp = "C:/EditCode/file/" + name_cpp + ".exe";
 
     QProcess myProcess(this);
     QStringList compilation;
@@ -159,7 +172,14 @@ void MainWindow::NewFile_Create()
     name_file->setText (name_new_file);
     edit_code->clear();
 
-    path_file = "D:/EditCode/file/" + name_new_file + ".cpp";
+    path_file = "C:/EditCode/file/" + name_new_file + ".cpp";
+
+    QFile file(path_file);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        name_file->setText("Not create file");
+    }
+    file.close();
 
     mw_newfile->deleteLater();
     edit_name->deleteLater();
@@ -175,7 +195,7 @@ void MainWindow::NewFile_Cancel()
 
 QString MainWindow::Name()
 {
-    qint8 i;
+    qint8 i = 0;
     for(auto rit = path_file.rbegin(); *rit != '/'; rit++, i++);
     return path_file.right(i);
 }
