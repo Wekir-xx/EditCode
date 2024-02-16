@@ -133,9 +133,9 @@ void MainWindow::NewFile()
 
 void MainWindow::OpenFile()
 {
-    SaveFile();
+    if(path_file.size() > 0) SaveFile();
 
-    path_file = QFileDialog::getOpenFileName(this, "Open file", "::/images/icon.png", "cpp file (*.cpp)");
+    path_file = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"));
     if(path_file.size() < 1) return;
 
     name_file->setText (Name());
@@ -152,7 +152,7 @@ void MainWindow::OpenFile()
 
 void MainWindow::SaveFile()
 {
-    if(path_file.size() < 1) return;
+    if(path_file.size() < 1) NewFile();
 
     QFile file(path_file);
     if (!file.open(QIODevice::WriteOnly))
@@ -169,8 +169,8 @@ void MainWindow::NewFile_Create()
     QString name_new_file = edit_name->displayText();    
     if(name_new_file.size() < 1) name_new_file = "Application";
 
-    name_file->setText (name_new_file);
-    edit_code->clear();
+    name_file->setText (name_new_file + ".cpp");
+    if (path_file.size() > 0) edit_code->clear();
 
     path_file = "C:/EditCode/file/" + name_new_file + ".cpp";
 
