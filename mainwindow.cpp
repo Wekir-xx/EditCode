@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
     edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 20, qApp->primaryScreen()->availableGeometry().height() - 94);
 
     name_file->setStyleSheet("font-size:10pt; font-weight: 550;");
-    edit_code->setStyleSheet("font-size:9pt; font-weight: 350;");
+    edit_code->setStyleSheet("font-size:10pt; font-weight: 450;");
 }
 
 MainWindow::~MainWindow()
@@ -72,13 +72,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::Run()
 {
-    SaveFile();
-
-    if(path_file.size() < 1) return;
+    if(path_file.size() == 0) return;
     this->setEnabled(false);
 
-    QString name_cpp = Name();
-    qint8 i = 0;
+    SaveFile();
+
+    QString name_cpp {Name(0)};
+    size_t i = 0;
     for(auto rit = name_cpp.begin(); *rit != '.'; rit++, i++);
     name_cpp = name_cpp.left(i);
     name_cpp = "C:/EditCode/file/" + name_cpp + ".exe";
@@ -86,7 +86,13 @@ void MainWindow::Run()
     QProcess myProcess(this);
     QStringList compilation;
 
-    compilation << "/C" << "g++" << path_file << "-o" << name_cpp;
+    compilation << "/C" << "g++";
+    for(auto it {path_file.begin()}; it != path_file.end(); it++)
+    {
+        compilation<< *it;
+    }
+    compilation<< "-o" << name_cpp;
+
     myProcess.start("cmd", compilation);
     myProcess.waitForFinished();
 
@@ -101,7 +107,7 @@ void MainWindow::Run()
 
 void MainWindow::NewFile()
 {
-    if (path_file.size() > 0) SaveFile();
+    if (path_file.size() != 0) SaveFile();
 
     mw_newfile = new QMainWindow(this);
     mw_newfile->setFixedSize(360, 125);
@@ -109,7 +115,7 @@ void MainWindow::NewFile()
     mw_newfile->setWindowTitle("New File - EditCode");
 
     QLabel* text_name = new QLabel(mw_newfile);
-    edit_name = new QLineEdit(mw_newfile);
+    QLineEdit* edit_name = new QLineEdit(mw_newfile);
     QPushButton* create = new QPushButton(mw_newfile);
     QPushButton* cancel = new QPushButton(mw_newfile);
 
@@ -127,75 +133,109 @@ void MainWindow::NewFile()
     mw_newfile->setEnabled(true);
     mw_newfile->show();
 
-    connect(create, &QPushButton::pressed, this, &MainWindow::NewFile_Create);
+    connect(create, &QPushButton::pressed, this, [this, edit_name]() {
+        NewFile_Create(edit_name->displayText());
+    });
     connect(cancel, &QPushButton::pressed, this, &MainWindow::NewFile_Cancel);
 }
 
 void MainWindow::OpenFile()
 {
-    if(path_file.size() > 0) SaveFile();
+    if(path_file.size() != 0) SaveFile();
 
-    path_file = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"));
-    if(path_file.size() < 1) return;
+    QString pathfile {QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"))};
+    if(pathfile.size() == 0) return;
 
-    name_file->setText (Name());
-
-    QFile file(path_file);
+    QFile file(pathfile);
     if (!file.open(QIODevice::ReadOnly))
     {
         name_file->setText("Not open file");
-        return;
     }
-    edit_code->setText (QString(file.readAll()));
-    file.close();
+    else
+    {
+        push_file(pathfile);
+
+        name_file->setText (Name(index));
+        edit_code->setText (QString(file.readAll()));
+        file.close();
+    }
 }
 
 void MainWindow::SaveFile()
 {
-    if(path_file.size() < 1) NewFile();
+    if(path_file.size() == 0)
+    {
+        NewFile();
+        return;
+    }
 
-    QFile file(path_file);
+    auto it = path_file.begin();
+    for(size_t i{}; i < index; i++, it++ );
+
+    QFile file(*it);
     if (!file.open(QIODevice::WriteOnly))
     {
         name_file->setText("Not save file");
-        return;
     }
-    file.write((edit_code->toPlainText()).toUtf8());
-    file.close();
+    else
+    {
+        file.write((edit_code->toPlainText()).toUtf8());
+        file.close();
+    }
 }
 
-void MainWindow::NewFile_Create()
+void MainWindow::NewFile_Create(QString name_new_file)
 {
-    QString name_new_file = edit_name->displayText();    
-    if(name_new_file.size() < 1) name_new_file = "Application";
-
+    if(name_new_file.size() == 0) name_new_file = "Application";
     name_file->setText (name_new_file + ".cpp");
-    if (path_file.size() > 0) edit_code->clear();
 
-    path_file = "C:/EditCode/file/" + name_new_file + ".cpp";
+    QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        if (path_file.size() != 0) edit_code->clear();
 
-    QFile file(path_file);
-    if (!file.open(QIODevice::WriteOnly))
+        push_file("C:/EditCode/file/" + name_new_file + ".cpp");
+        file.close();
+    }
+    else
     {
         name_file->setText("Not create file");
     }
-    file.close();
 
     mw_newfile->deleteLater();
-    edit_name->deleteLater();
     this->setEnabled(true);
+
+    if(path_file.size() == 1) SaveFile();
 }
 
 void MainWindow::NewFile_Cancel()
 {
     mw_newfile->deleteLater();
-    edit_name->deleteLater();
     this->setEnabled(true);
 }
 
-QString MainWindow::Name()
+QString MainWindow::Name(size_t number_file)
 {
-    qint8 i = 0;
-    for(auto rit = path_file.rbegin(); *rit != '/'; rit++, i++);
-    return path_file.right(i);
+    auto it = path_file.begin();
+    for(size_t i{}; i < number_file; i++, it++ );
+
+    size_t i{};
+    for(auto rit = it->rbegin(); *rit != '/'; rit++, i++);
+
+    return it->right(i);
+}
+
+void MainWindow::push_file(QString pathfile)
+{
+    auto it = path_file.begin();
+    for(qint8 i{}; i < path_file.size() - 1; i++, it++ )
+    {
+        if(*it == pathfile)
+        {
+            index = i;
+            return;
+        }
+    }
+    path_file.push_back(pathfile);
+    index = path_file.size() - 1;
 }

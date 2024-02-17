@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QApplication>
 #include <QLineEdit>
+#include <QList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,16 +28,17 @@ private slots:
     void NewFile();
     void OpenFile();
     void SaveFile();
-    void NewFile_Create();
+    void NewFile_Create(QString name_new_file);
     void NewFile_Cancel();
 
 private:
-    QString path_file;
+    QList<QString> path_file;
     QLabel* name_file;
     QTextEdit* edit_code;
     QMainWindow* mw_newfile;
-    QLineEdit* edit_name;
+    size_t index{};
 
-    QString Name();
+    QString Name(size_t number_file);
+    void push_file(QString pathfile);
 };
 #endif // MAINWINDOW_H
