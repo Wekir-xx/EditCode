@@ -6,7 +6,6 @@ int main(int argc, char *argv[])
 
     MainWindow EditCode;
     EditCode.showMaximized();
-    EditCode.show();
 
     return a.exec();
 }

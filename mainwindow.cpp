@@ -63,23 +63,39 @@ MainWindow::MainWindow(QWidget *parent)
 
     name_file->setStyleSheet("font-size:10pt; font-weight: 550;");
     edit_code->setStyleSheet("font-size:10pt; font-weight: 450;");
+
+    QTextOption textOption = edit_code->document()->defaultTextOption();
+    textOption.setTabStopDistance(20);
+    edit_code->document()->setDefaultTextOption(textOption);
 }
 
 MainWindow::~MainWindow()
 {
-
+    name_file->deleteLater();
+    edit_code->deleteLater();
 }
 
 void MainWindow::Run()
 {
+    if(path_file.size() == 0) NewFile();
     if(path_file.size() == 0) return;
     this->setEnabled(false);
 
-    SaveFile();
+    auto itc = file_code.begin();
+    for(size_t i{}; i < index; ++i, ++itc );
+    *itc = edit_code->toPlainText();
+
+    size_t for_index = index;
+    for(qint8 i {}; i < path_file.size(); ++i)
+    {
+        index = i;
+        SaveFile();
+    }
+    index = for_index;
 
     QString name_cpp {Name(0)};
     size_t i = 0;
-    for(auto rit = name_cpp.begin(); *rit != '.'; rit++, i++);
+    for(auto rit = name_cpp.begin(); *rit != '.'; ++rit, ++i);
     name_cpp = name_cpp.left(i);
     name_cpp = "C:/EditCode/file/" + name_cpp + ".exe";
 
@@ -87,9 +103,9 @@ void MainWindow::Run()
     QStringList compilation;
 
     compilation << "/C" << "g++";
-    for(auto it {path_file.begin()}; it != path_file.end(); it++)
+    for(auto itp {path_file.begin()}; itp != path_file.end(); ++itp)
     {
-        compilation<< *it;
+        compilation<< *itp;
     }
     compilation<< "-o" << name_cpp;
 
@@ -153,6 +169,10 @@ void MainWindow::OpenFile()
     }
     else
     {
+        auto itc = file_code.begin();
+        for(size_t i{}; i < index; ++i, ++itc );
+        *itc = edit_code->toPlainText();
+
         push_file(pathfile);
 
         name_file->setText (Name(index));
@@ -169,17 +189,20 @@ void MainWindow::SaveFile()
         return;
     }
 
-    auto it = path_file.begin();
-    for(size_t i{}; i < index; i++, it++ );
+    auto itp = path_file.begin();
+    for(size_t i{}; i < index; ++i, ++itp );
 
-    QFile file(*it);
+    QFile file(*itp);
     if (!file.open(QIODevice::WriteOnly))
     {
         name_file->setText("Not save file");
     }
     else
     {
-        file.write((edit_code->toPlainText()).toUtf8());
+        auto itc = file_code.begin();
+        for(size_t i{}; i < index; ++i, ++itc );
+
+        file.write(itc->toUtf8());
         file.close();
     }
 }
@@ -192,7 +215,14 @@ void MainWindow::NewFile_Create(QString name_new_file)
     QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
     if (file.open(QIODevice::WriteOnly))
     {
-        if (path_file.size() != 0) edit_code->clear();
+        if (path_file.size() != 0)
+        {
+            auto itc = file_code.begin();
+            for(size_t i{}; i < index; ++i, ++itc );
+            *itc = edit_code->toPlainText();
+
+            edit_code->clear();
+        }
 
         push_file("C:/EditCode/file/" + name_new_file + ".cpp");
         file.close();
@@ -214,28 +244,52 @@ void MainWindow::NewFile_Cancel()
     this->setEnabled(true);
 }
 
+void MainWindow::Remove()
+{
+    QString remove_file;
+
+    auto itp = path_file.begin();
+    auto itc = file_code.begin();
+    for(size_t i{}; remove_file != Name(i); ++i, ++itp, ++itc );
+
+    path_file.erase(itp);
+    file_code.erase(itc);
+}
+
+void MainWindow::All_Remove()
+{
+    qint8 size = path_file.size();
+    for(qint8 i{}; i < size; ++i)
+    {
+        path_file.pop_front();
+        file_code.pop_front();
+    }
+    index = 0;
+}
+
 QString MainWindow::Name(size_t number_file)
 {
-    auto it = path_file.begin();
-    for(size_t i{}; i < number_file; i++, it++ );
+    auto itp = path_file.begin();
+    for(size_t i{}; i < number_file; ++i, ++itp );
 
     size_t i{};
-    for(auto rit = it->rbegin(); *rit != '/'; rit++, i++);
+    for(auto rit = itp->rbegin(); *rit != '/'; ++rit, ++i);
 
-    return it->right(i);
+    return itp->right(i);
 }
 
 void MainWindow::push_file(QString pathfile)
 {
-    auto it = path_file.begin();
-    for(qint8 i{}; i < path_file.size() - 1; i++, it++ )
+    auto itp = path_file.begin();
+    for(qint8 i{}; i < path_file.size(); ++i, ++itp )
     {
-        if(*it == pathfile)
+        if(*itp == pathfile)
         {
             index = i;
             return;
         }
     }
     path_file.push_back(pathfile);
+    file_code.push_back("");
     index = path_file.size() - 1;
 }

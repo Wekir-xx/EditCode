@@ -30,13 +30,16 @@ private slots:
     void SaveFile();
     void NewFile_Create(QString name_new_file);
     void NewFile_Cancel();
+    void Remove();
+    void All_Remove();
 
 private:
     QList<QString> path_file;
+    QList<QString> file_code;
+    size_t index{};
     QLabel* name_file;
     QTextEdit* edit_code;
     QMainWindow* mw_newfile;
-    size_t index{};
 
     QString Name(size_t number_file);
     void push_file(QString pathfile);
