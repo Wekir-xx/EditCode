@@ -94,12 +94,21 @@ MainWindow::MainWindow(QWidget *parent)
     QListWidgetItem* remove_file{};
 
     connect(list_widget, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *item){
-        SelectFile(item);
+        if(path_file.size() != 0) SelectFile(item);
     });
     connect(list_widget, &QListWidget::itemClicked, [&](QListWidgetItem *item){
-        remove_file = item;
+        if(remove_file == item)
+        {
+            remove_file = nullptr;
+        }
+        else
+        {
+            remove_file = item;
+        }
     });
     connect(But_Remove, &QPushButton::pressed, this, [&](){
+        list_widget->setEnabled(false);
+
         if(remove_file != nullptr)
         {
             Remove(remove_file->text());
@@ -108,8 +117,17 @@ MainWindow::MainWindow(QWidget *parent)
             delete item;
         }
         remove_file = nullptr;
+
+        list_widget->setEnabled(true);
     });
-    connect(But_All_Remove, &QPushButton::pressed, this, &MainWindow::All_Remove);
+    connect(But_All_Remove, &QPushButton::pressed, this, [&](){
+        list_widget->setEnabled(false);
+
+        All_Remove();
+        remove_file = nullptr;
+
+        list_widget->setEnabled(true);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -196,6 +214,7 @@ void MainWindow::NewFile()
 
 void MainWindow::OpenFile()
 {
+    this->setEnabled(false);
     if(path_file.size() != 0) SaveFile();
 
     QString pathfile {QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"))};
@@ -214,7 +233,6 @@ void MainWindow::OpenFile()
 
         name_file->setText (Name(index));
         edit_code->setText (QString(file.readAll()));
-        list_widget->addItem(name_file->text());
 
         file.close();
 
@@ -226,6 +244,7 @@ void MainWindow::OpenFile()
     {
         name_file->setText("Not open file");
     }
+    this->setEnabled(true);
 }
 
 void MainWindow::SaveFile()
@@ -289,9 +308,9 @@ void MainWindow::NewFile_Create(QString name_new_file)
     }
 
     mw_newfile->deleteLater();
-    this->setEnabled(true);
 
     if(path_file.size() == 1) SaveFile();
+    this->setEnabled(true);
 }
 
 void MainWindow::NewFile_Cancel()
@@ -302,17 +321,18 @@ void MainWindow::NewFile_Cancel()
 
 void MainWindow::SelectFile(QListWidgetItem *item)
 {
-    if(path_file.size() == 0) return;
-
     auto itp = path_file.begin();
     auto itc = file_code.begin();
     for(size_t i{}; itp != path_file.end(); ++i, ++itp, ++itc )
     {
         if(Name(i) == item->text())
         {
-            auto itc_2 = file_code.begin();
-            for(size_t i{}; i < index; ++i, ++itc_2 );
-            *itc_2 = edit_code->toPlainText();
+            if(path_file.size() != 1)
+            {
+                auto itc_2 = file_code.begin();
+                for(size_t i{}; i < index; ++i, ++itc_2 );
+                *itc_2 = edit_code->toPlainText();
+            }
 
             index = i;
             edit_code->setText(*itc);
@@ -338,6 +358,7 @@ void MainWindow::Remove(QString remove_file)
 
     path_file.erase(itp);
     file_code.erase(itc);
+    index = 0;
 }
 
 void MainWindow::All_Remove()
@@ -348,7 +369,10 @@ void MainWindow::All_Remove()
         path_file.pop_front();
         file_code.pop_front();
     }
-    index = 0;
+
+    name_file->setText("");
+    edit_code->setText("");
+    list_widget->clear();
 }
 
 QString MainWindow::Name(size_t number_file)
@@ -376,4 +400,5 @@ void MainWindow::push_file(QString pathfile)
     path_file.push_back(pathfile);
     file_code.push_back("");
     index = path_file.size() - 1;
+    list_widget->addItem(Name(index));
 }
