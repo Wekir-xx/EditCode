@@ -131,6 +131,7 @@ MainWindow::~MainWindow()
 {
     name_file->deleteLater();
     edit_code->deleteLater();
+    list_widget->deleteLater();
 }
 
 void MainWindow::Run()
@@ -224,7 +225,10 @@ void MainWindow::OpenFile()
     QString pathfile {QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"))};
 
     if(pathfile.size() == 0)
+    {
+        this->setEnabled(true);
         return;
+    }
 
     QFile file(pathfile);
     if (file.open(QIODevice::ReadOnly))
