@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QLineEdit>
 #include <QList>
+#include <QtWidgets/QListWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,10 +31,12 @@ private slots:
     void SaveFile();
     void NewFile_Create(QString name_new_file);
     void NewFile_Cancel();
-    void Remove();
+    void SelectFile(QListWidgetItem *item);
+    void Remove(QString remove_file);
     void All_Remove();
 
 private:
+    QListWidget* list_widget;
     QList<QString> path_file;
     QList<QString> file_code;
     size_t index{};

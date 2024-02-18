@@ -58,15 +58,58 @@ MainWindow::MainWindow(QWidget *parent)
 
     name_file = new QLabel(this);
     edit_code = new QTextEdit(this);
-    name_file->setGeometry(20, 25, 700, 35);
-    edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 20, qApp->primaryScreen()->availableGeometry().height() - 94);
+    list_widget = new QListWidget(this);
 
-    name_file->setStyleSheet("font-size:10pt; font-weight: 550;");
+    name_file->setGeometry(20, 25, 700, 35);
+    edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
+                           qApp->primaryScreen()->availableGeometry().height() - 94);
+    list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
+                             qApp->primaryScreen()->availableGeometry().height() - 500);
+
+    name_file->setStyleSheet("font-size:11pt; font-weight: 550;");
     edit_code->setStyleSheet("font-size:10pt; font-weight: 450;");
+    list_widget->setStyleSheet("font-size:10pt; font-weight: 550;");
 
     QTextOption textOption = edit_code->document()->defaultTextOption();
     textOption.setTabStopDistance(20);
     edit_code->document()->setDefaultTextOption(textOption);
+
+    QPushButton* But_Remove = new QPushButton(this);
+    QPushButton* But_All_Remove = new QPushButton(this);
+
+    But_Remove->setText("Remove File");
+    But_All_Remove->setText("Remove All File");
+
+    But_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
+                            qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
+    But_All_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
+                            qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+
+    But_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
+    But_All_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
+
+    But_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
+    But_All_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
+
+    QListWidgetItem* remove_file{};
+
+    connect(list_widget, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *item){
+        SelectFile(item);
+    });
+    connect(list_widget, &QListWidget::itemClicked, [&](QListWidgetItem *item){
+        remove_file = item;
+    });
+    connect(But_Remove, &QPushButton::pressed, this, [&](){
+        if(remove_file != nullptr)
+        {
+            Remove(remove_file->text());
+
+            QListWidgetItem* item = list_widget->takeItem(list_widget->row(remove_file));
+            delete item;
+        }
+        remove_file = nullptr;
+    });
+    connect(But_All_Remove, &QPushButton::pressed, this, &MainWindow::All_Remove);
 }
 
 MainWindow::~MainWindow()
@@ -163,21 +206,25 @@ void MainWindow::OpenFile()
     if(pathfile.size() == 0) return;
 
     QFile file(pathfile);
-    if (!file.open(QIODevice::ReadOnly))
+    if (file.open(QIODevice::ReadOnly))
     {
-        name_file->setText("Not open file");
-    }
-    else
-    {
-        auto itc = file_code.begin();
-        for(size_t i{}; i < index; ++i, ++itc );
-        *itc = edit_code->toPlainText();
-
+        if(path_file.size() != 0)
+        {
+            auto itc = file_code.begin();
+            for(size_t i{}; i < index; ++i, ++itc );
+            *itc = edit_code->toPlainText();
+        }
         push_file(pathfile);
 
         name_file->setText (Name(index));
         edit_code->setText (QString(file.readAll()));
+        list_widget->addItem(name_file->text());
+
         file.close();
+    }
+    else
+    {
+        name_file->setText("Not open file");
     }
 }
 
@@ -193,11 +240,7 @@ void MainWindow::SaveFile()
     for(size_t i{}; i < index; ++i, ++itp );
 
     QFile file(*itp);
-    if (!file.open(QIODevice::WriteOnly))
-    {
-        name_file->setText("Not save file");
-    }
-    else
+    if (file.open(QIODevice::WriteOnly))
     {
         auto itc = file_code.begin();
         for(size_t i{}; i < index; ++i, ++itc );
@@ -205,16 +248,21 @@ void MainWindow::SaveFile()
         file.write(itc->toUtf8());
         file.close();
     }
+    else
+    {
+        name_file->setText("Not save file");
+    }
 }
 
 void MainWindow::NewFile_Create(QString name_new_file)
 {
     if(name_new_file.size() == 0) name_new_file = "Application";
-    name_file->setText (name_new_file + ".cpp");
 
     QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
     if (file.open(QIODevice::WriteOnly))
     {
+        file.close();
+
         if (path_file.size() != 0)
         {
             auto itc = file_code.begin();
@@ -223,9 +271,9 @@ void MainWindow::NewFile_Create(QString name_new_file)
 
             edit_code->clear();
         }
-
+        name_file->setText (name_new_file + ".cpp");
+        list_widget->addItem(name_file->text());
         push_file("C:/EditCode/file/" + name_new_file + ".cpp");
-        file.close();
     }
     else
     {
@@ -244,13 +292,41 @@ void MainWindow::NewFile_Cancel()
     this->setEnabled(true);
 }
 
-void MainWindow::Remove()
+void MainWindow::SelectFile(QListWidgetItem *item)
 {
-    QString remove_file;
+    if(path_file.size() != 0) return;
 
     auto itp = path_file.begin();
     auto itc = file_code.begin();
-    for(size_t i{}; remove_file != Name(i); ++i, ++itp, ++itc );
+    for(size_t i{}; itp != path_file.end(); ++i, ++itp, ++itc )
+    {
+        if(Name(i) == item->text())
+        {
+            auto itc_2 = file_code.begin();
+            for(size_t i{}; i < index; ++i, ++itc_2 );
+            *itc_2 = edit_code->toPlainText();
+
+            index = i;
+            edit_code->setText(*itc);
+            name_file->setText(item->text());
+
+            return;
+        }
+    }
+}
+
+void MainWindow::Remove(QString remove_file)
+{
+    auto itp = path_file.begin();
+    auto itc = file_code.begin();
+    size_t i{};
+    for(; remove_file != Name(i); ++i, ++itp, ++itc );
+
+    if(i == index || path_file.size() == 1)
+    {
+        name_file->setText("");
+        edit_code->setText("");
+    }
 
     path_file.erase(itp);
     file_code.erase(itc);
