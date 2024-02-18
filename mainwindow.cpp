@@ -124,10 +124,6 @@ void MainWindow::Run()
     if(path_file.size() == 0) return;
     this->setEnabled(false);
 
-    auto itc = file_code.begin();
-    for(size_t i{}; i < index; ++i, ++itc );
-    *itc = edit_code->toPlainText();
-
     size_t for_index = index;
     for(qint8 i {}; i < path_file.size(); ++i)
     {
@@ -221,6 +217,10 @@ void MainWindow::OpenFile()
         list_widget->addItem(name_file->text());
 
         file.close();
+
+        auto itc_2 = file_code.begin();
+        for(size_t i{}; i < index; ++i, ++itc_2 );
+        *itc_2 = edit_code->toPlainText();
     }
     else
     {
@@ -245,7 +245,12 @@ void MainWindow::SaveFile()
         auto itc = file_code.begin();
         for(size_t i{}; i < index; ++i, ++itc );
 
-        file.write(itc->toUtf8());
+        if(Name(index) == name_file->text())
+        {
+            *itc = edit_code->toPlainText();
+        }
+
+        file.write((*itc).toUtf8());
         file.close();
     }
     else
@@ -256,7 +261,10 @@ void MainWindow::SaveFile()
 
 void MainWindow::NewFile_Create(QString name_new_file)
 {
-    if(name_new_file.size() == 0) name_new_file = "Application";
+    if(name_new_file.size() == 0)
+    {
+        name_new_file = "Application";
+    }
 
     QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
     if (file.open(QIODevice::WriteOnly))
@@ -294,7 +302,7 @@ void MainWindow::NewFile_Cancel()
 
 void MainWindow::SelectFile(QListWidgetItem *item)
 {
-    if(path_file.size() != 0) return;
+    if(path_file.size() == 0) return;
 
     auto itp = path_file.begin();
     auto itc = file_code.begin();

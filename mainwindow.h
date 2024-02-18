@@ -39,7 +39,7 @@ private:
     QListWidget* list_widget;
     QList<QString> path_file;
     QList<QString> file_code;
-    size_t index{};
+    size_t index;
     QLabel* name_file;
     QTextEdit* edit_code;
     QMainWindow* mw_newfile;
