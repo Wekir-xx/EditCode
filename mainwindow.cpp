@@ -94,17 +94,14 @@ MainWindow::MainWindow(QWidget *parent)
     QListWidgetItem* remove_file{};
 
     connect(list_widget, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *item){
-        if(path_file.size() != 0) SelectFile(item);
+        if(path_file.size() != 0)
+            SelectFile(item);
     });
     connect(list_widget, &QListWidget::itemClicked, [&](QListWidgetItem *item){
         if(remove_file == item)
-        {
             remove_file = nullptr;
-        }
         else
-        {
             remove_file = item;
-        }
     });
     connect(But_Remove, &QPushButton::pressed, this, [&](){
         list_widget->setEnabled(false);
@@ -138,8 +135,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::Run()
 {
-    if(path_file.size() == 0) NewFile();
-    if(path_file.size() == 0) return;
+    if(path_file.size() == 0)
+        NewFile();
+    if(path_file.size() == 0)
+        return;
+
     this->setEnabled(false);
 
     size_t for_index = index;
@@ -153,6 +153,7 @@ void MainWindow::Run()
     QString name_cpp {Name(0)};
     size_t i = 0;
     for(auto rit = name_cpp.begin(); *rit != '.'; ++rit, ++i);
+
     name_cpp = name_cpp.left(i);
     name_cpp = "C:/EditCode/file/" + name_cpp + ".exe";
 
@@ -160,10 +161,10 @@ void MainWindow::Run()
     QStringList compilation;
 
     compilation << "/C" << "g++";
+
     for(auto itp {path_file.begin()}; itp != path_file.end(); ++itp)
-    {
         compilation<< *itp;
-    }
+
     compilation<< "-o" << name_cpp;
 
     myProcess.start("cmd", compilation);
@@ -180,7 +181,8 @@ void MainWindow::Run()
 
 void MainWindow::NewFile()
 {
-    if (path_file.size() != 0) SaveFile();
+    if (path_file.size() != 0)
+        SaveFile();
 
     mw_newfile = new QMainWindow(this);
     mw_newfile->setFixedSize(360, 125);
@@ -206,7 +208,7 @@ void MainWindow::NewFile()
     mw_newfile->setEnabled(true);
     mw_newfile->show();
 
-    connect(create, &QPushButton::pressed, this, [this, edit_name]() {
+    connect(create, &QPushButton::pressed, this, [this, edit_name](){
         NewFile_Create(edit_name->displayText());
     });
     connect(cancel, &QPushButton::pressed, this, &MainWindow::NewFile_Cancel);
@@ -215,10 +217,14 @@ void MainWindow::NewFile()
 void MainWindow::OpenFile()
 {
     this->setEnabled(false);
-    if(path_file.size() != 0) SaveFile();
+
+    if(path_file.size() != 0)
+        SaveFile();
 
     QString pathfile {QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"))};
-    if(pathfile.size() == 0) return;
+
+    if(pathfile.size() == 0)
+        return;
 
     QFile file(pathfile);
     if (file.open(QIODevice::ReadOnly))
@@ -226,24 +232,24 @@ void MainWindow::OpenFile()
         if(path_file.size() != 0)
         {
             auto itc = file_code.begin();
-            for(size_t i{}; i < index; ++i, ++itc );
+            for(size_t i{}; i < index; ++i, ++itc);
             *itc = edit_code->toPlainText();
         }
-        push_file(pathfile);
 
+        push_file(pathfile);
         name_file->setText (Name(index));
         edit_code->setText (QString(file.readAll()));
 
         file.close();
 
         auto itc_2 = file_code.begin();
-        for(size_t i{}; i < index; ++i, ++itc_2 );
+        for(size_t i{}; i < index; ++i, ++itc_2);
+
         *itc_2 = edit_code->toPlainText();
     }
     else
-    {
         name_file->setText("Not open file");
-    }
+
     this->setEnabled(true);
 }
 
@@ -256,34 +262,28 @@ void MainWindow::SaveFile()
     }
 
     auto itp = path_file.begin();
-    for(size_t i{}; i < index; ++i, ++itp );
+    for(size_t i{}; i < index; ++i, ++itp);
 
     QFile file(*itp);
     if (file.open(QIODevice::WriteOnly))
     {
         auto itc = file_code.begin();
-        for(size_t i{}; i < index; ++i, ++itc );
+        for(size_t i{}; i < index; ++i, ++itc);
 
         if(Name(index) == name_file->text())
-        {
             *itc = edit_code->toPlainText();
-        }
 
         file.write((*itc).toUtf8());
         file.close();
     }
     else
-    {
         name_file->setText("Not save file");
-    }
 }
 
 void MainWindow::NewFile_Create(QString name_new_file)
 {
     if(name_new_file.size() == 0)
-    {
         name_new_file = "Application";
-    }
 
     QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
     if (file.open(QIODevice::WriteOnly))
@@ -293,23 +293,22 @@ void MainWindow::NewFile_Create(QString name_new_file)
         if (path_file.size() != 0)
         {
             auto itc = file_code.begin();
-            for(size_t i{}; i < index; ++i, ++itc );
+            for(size_t i{}; i < index; ++i, ++itc);
             *itc = edit_code->toPlainText();
 
             edit_code->clear();
         }
+
         name_file->setText (name_new_file + ".cpp");
-        list_widget->addItem(name_file->text());
         push_file("C:/EditCode/file/" + name_new_file + ".cpp");
     }
     else
-    {
         name_file->setText("Not create file");
-    }
+
+    if(path_file.size() == 1)
+        SaveFile();
 
     mw_newfile->deleteLater();
-
-    if(path_file.size() == 1) SaveFile();
     this->setEnabled(true);
 }
 
@@ -323,14 +322,14 @@ void MainWindow::SelectFile(QListWidgetItem *item)
 {
     auto itp = path_file.begin();
     auto itc = file_code.begin();
-    for(size_t i{}; itp != path_file.end(); ++i, ++itp, ++itc )
+    for(size_t i{}; itp != path_file.end(); ++i, ++itp, ++itc)
     {
         if(Name(i) == item->text())
         {
             if(path_file.size() != 1)
             {
                 auto itc_2 = file_code.begin();
-                for(size_t i{}; i < index; ++i, ++itc_2 );
+                for(size_t i{}; i < index; ++i, ++itc_2);
                 *itc_2 = edit_code->toPlainText();
             }
 
@@ -348,7 +347,7 @@ void MainWindow::Remove(QString remove_file)
     auto itp = path_file.begin();
     auto itc = file_code.begin();
     size_t i{};
-    for(; remove_file != Name(i); ++i, ++itp, ++itc );
+    for(; remove_file != Name(i); ++i, ++itp, ++itc);
 
     if(i == index || path_file.size() == 1)
     {
@@ -378,7 +377,7 @@ void MainWindow::All_Remove()
 QString MainWindow::Name(size_t number_file)
 {
     auto itp = path_file.begin();
-    for(size_t i{}; i < number_file; ++i, ++itp );
+    for(size_t i{}; i < number_file; ++i, ++itp);
 
     size_t i{};
     for(auto rit = itp->rbegin(); *rit != '/'; ++rit, ++i);
@@ -389,7 +388,7 @@ QString MainWindow::Name(size_t number_file)
 void MainWindow::push_file(QString pathfile)
 {
     auto itp = path_file.begin();
-    for(qint8 i{}; i < path_file.size(); ++i, ++itp )
+    for(qint8 i{}; i < path_file.size(); ++i, ++itp)
     {
         if(*itp == pathfile)
         {
@@ -397,8 +396,10 @@ void MainWindow::push_file(QString pathfile)
             return;
         }
     }
+
     path_file.push_back(pathfile);
     file_code.push_back("");
     index = path_file.size() - 1;
+
     list_widget->addItem(Name(index));
 }
