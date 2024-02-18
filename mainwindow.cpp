@@ -401,5 +401,5 @@ void MainWindow::push_file(QString pathfile)
     file_code.push_back("");
     index = path_file.size() - 1;
 
-    list_widget->addItem(Name(index));
+    list_widget->addItem(new QListWidgetItem(QIcon(":/images/list_icon.png"), Name(index)));
 }
