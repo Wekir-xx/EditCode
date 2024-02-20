@@ -8,7 +8,6 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -17,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowTitle("EditCode");
     this->setWindowIcon(QIcon(":/images/icon.png"));
 
-    CreateDirectory();
+    CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode");
+    CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode\\file");
     CreateMenuBar();
     CreateMainApp();
 }
@@ -46,40 +46,29 @@ void MainWindow::Run()
     }
     _index = time_index;
 
-    QString name_cpp {NameFile(0)};
-    size_t i = 0;
-    for(auto rev_iter = name_cpp.begin(); *rev_iter != '.'; ++rev_iter, ++i);
+    QString main_file = GetNameFile(0);
+    size_t i{};
+    for(auto rev_iter = main_file.begin(); *rev_iter != '.'; ++rev_iter, ++i);
 
-    name_cpp = name_cpp.left(i);
-    name_cpp = "C:/EditCode/file/" + name_cpp + ".exe";
+    main_file = main_file.left(i);
+    main_file = "C:/EditCode/file/" + main_file + ".exe";
 
-    QProcess myProcess(this);
-    QStringList compilation;
+    QStringList compilation{};
 
     compilation << "/C" << "g++";
 
     for(auto& iter_path : _path_file)
         compilation<< iter_path;
 
-    compilation<< "-o" << name_cpp;
+    CMD(compilation << "-o" << main_file);
 
-    myProcess.start("cmd", compilation);
-    myProcess.waitForFinished();
-
-    compilation.clear();
-
-    compilation << "/C" << "start" << name_cpp;
-    myProcess.start("cmd", compilation);
-    myProcess.waitForFinished();
+    CMD(QStringList() << "/C" << "start" << main_file);
 
     this->setEnabled(true);
 }
 
 void MainWindow::NewFile()
 {
-    if (_path_file.size() != 0)
-        SaveFile();
-
     _MW_newfile = new QMainWindow(this);
     _MW_newfile->setFixedSize(360, 125);
     _MW_newfile->setWindowIcon(QIcon(":/images/icon.png"));
@@ -114,10 +103,7 @@ void MainWindow::OpenFile()
 {
     this->setEnabled(false);
 
-    if(_path_file.size() != 0)
-        SaveFile();
-
-    QString path_new_file {QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"))};
+    QString path_new_file = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"));
 
     if(path_new_file.size() == 0)
     {
@@ -136,7 +122,7 @@ void MainWindow::OpenFile()
         }
 
         PushFile(path_new_file);
-        _name_file->setText (NameFile(_index));
+        _name_file->setText (GetNameFile(_index));
         _edit_code->setText (QString(file.readAll()));
 
         file.close();
@@ -166,13 +152,13 @@ void MainWindow::SaveFile()
     QFile file(*iter_path);
     if (file.open(QIODevice::WriteOnly))
     {
-        auto itc = _file_code.begin();
-        for(size_t i{}; i < _index; ++i, ++itc);
+        auto iter_code = _file_code.begin();
+        for(size_t i{}; i < _index; ++i, ++iter_code);
 
-        if(NameFile(_index) == _name_file->text())
-            *itc = _edit_code->toPlainText();
+        if(GetNameFile(_index) == _name_file->text())
+            *iter_code = _edit_code->toPlainText();
 
-        file.write((*itc).toUtf8());
+        file.write((*iter_code).toUtf8());
         file.close();
     }
     else
@@ -223,7 +209,7 @@ void MainWindow::SelectFile(QListWidgetItem *item)
     auto iter_code = _file_code.begin();
     for(size_t i{}; iter_path != _path_file.end(); ++i, ++iter_path, ++iter_code)
     {
-        if(NameFile(i) == item->text())
+        if(GetNameFile(i) == item->text())
         {
             if(_path_file.size() != 1)
             {
@@ -246,7 +232,7 @@ void MainWindow::Remove(QString remove_file)
     auto iter_path = _path_file.begin();
     auto iter_code = _file_code.begin();
     size_t i{};
-    for(; remove_file != NameFile(i); ++i, ++iter_path, ++iter_code);
+    for(; remove_file != GetNameFile(i); ++i, ++iter_path, ++iter_code);
 
     if(i == _index || _path_file.size() == 1)
     {
@@ -272,7 +258,33 @@ void MainWindow::All_Remove()
     _list_widget->clear();
 }
 
-QString MainWindow::NameFile(size_t number_file)
+void MainWindow::setCordsApp(bool tr)
+{
+    if(tr)
+    {
+        _name_file->setGeometry(20, 25, 700, 35);
+        _edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
+                                qApp->primaryScreen()->availableGeometry().height() - 94);
+        _list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
+                                  qApp->primaryScreen()->availableGeometry().height() - 500);
+        _But_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
+                                qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
+        _But_All_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
+                                    qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+    }
+    else
+    {
+        _name_file->setGeometry(350, 25, 700, 35);
+        _edit_code->setGeometry(340, 55, qApp->primaryScreen()->availableGeometry().width() - 354,
+                                qApp->primaryScreen()->availableGeometry().height() - 94);
+        _list_widget->setGeometry(10, 55, 320, qApp->primaryScreen()->availableGeometry().height() - 500);
+        _But_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
+        _But_All_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+    }
+}
+
+
+QString MainWindow::GetNameFile(size_t number_file)
 {
     auto iter_path = _path_file.begin();
     for(size_t i{}; i < number_file; ++i, ++iter_path);
@@ -299,22 +311,13 @@ void MainWindow::PushFile(QString path_new_file)
     _file_code.push_back("");
     _index = _path_file.size() - 1;
 
-    _list_widget->addItem(new QListWidgetItem(QIcon(":/images/list_icon.png"), NameFile(_index)));
+    _list_widget->addItem(new QListWidgetItem(QIcon(":/images/list_icon.png"), GetNameFile(_index)));
 }
 
-void MainWindow::CreateDirectory()
+void MainWindow::CMD(QStringList& list)
 {
     QProcess myProcess(this);
-    QStringList compilation;
-
-    compilation << "/C" << "mkdir" << "C:\\EditCode";
-    myProcess.start("cmd", compilation);
-    myProcess.waitForFinished();
-
-    compilation.clear();
-
-    compilation << "/C" << "mkdir" << "C:\\EditCode\\file";
-    myProcess.start("cmd", compilation);
+    myProcess.start("cmd", list);
     myProcess.waitForFinished();
 }
 
@@ -322,31 +325,67 @@ void MainWindow::CreateMenuBar()
 {
     menuBar()->setStyleSheet("background-color: #D3D3D3");
 
-    QMenu *file_bar = menuBar()->addMenu("File");
     QAction *new_file = new QAction(QIcon(":/images/new.png"), "&New File", this);
     QAction *open_file = new QAction(QIcon(":/images/open.png"), "&Open File", this);
     QAction *save_file = new QAction(QIcon(":/images/save.png"), "&Save File", this);
     QAction *quit = new QAction("&Quit", this);
     QAction *run = new QAction("&Run (CTRL+F5)", this);
+    QAction* left_form = new QAction("&Left Form", this);
+    QAction* right_form = new QAction("&Right Form", this);
+
+    QActionGroup* group = new QActionGroup(this);
+    group->setExclusive(true);
+    left_form->setCheckable(true);
+    right_form->setCheckable(true);
+    left_form->setActionGroup(group);
+    right_form->setActionGroup(group);
+    left_form->setChecked(true);
 
     new_file->setShortcut(tr("CTRL+N"));
     open_file->setShortcut(tr("CTRL+O"));
     save_file->setShortcut(tr("CTRL+S"));
     run->setShortcut(tr("CTRL+F5"));
     quit->setShortcut(tr("CTRL+Q"));
+    left_form->setShortcut(tr("ALT+0"));
+    right_form->setShortcut(tr("ALT+SHIFT+0"));
 
     connect(quit, &QAction::triggered, this, &QApplication::quit);
     connect(new_file, &QAction::triggered, this, &MainWindow::NewFile);
     connect(open_file, &QAction::triggered, this, &MainWindow::OpenFile);
     connect(save_file, &QAction::triggered, this, &MainWindow::SaveFile);
     connect(run, &QAction::triggered, this, &MainWindow::Run);
+    connect(left_form, &QAction::triggered, this, [this](){
+        this->setEnabled(false);
+
+        setCordsApp(true);
+
+        this->setEnabled(true);
+    });
+    connect(right_form, &QAction::triggered, this, [this](){
+        this->setEnabled(false);
+
+        setCordsApp(false);
+
+        this->setEnabled(true);
+    });
+
+    QMenu *file_bar = menuBar()->addMenu("File");
+    menuBar()->addAction(run);
+    QMenu *view_bar = menuBar()->addMenu("View");
 
     file_bar->addAction(new_file);
     file_bar->addAction(open_file);
     file_bar->addAction(save_file);
     file_bar->addSeparator();
     file_bar->addAction(quit);
-    menuBar()->addAction(run);
+
+    view_bar->addAction(left_form);
+    view_bar->addAction(right_form);
+
+    file_bar->setStyleSheet("QMenu::item:selected { background-color: #A9A9A9;"
+                            "color: black; }");
+    view_bar->setStyleSheet("QMenu::item:selected { background-color: #A9A9A9;"
+                            "color: black; }");
 }
 
 void MainWindow::CreateMainApp()
@@ -354,12 +393,6 @@ void MainWindow::CreateMainApp()
     _name_file = new QLabel(this);
     _edit_code = new QTextEdit(this);
     _list_widget = new QListWidget(this);
-
-    _name_file->setGeometry(20, 25, 700, 35);
-    _edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
-                            qApp->primaryScreen()->availableGeometry().height() - 94);
-    _list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
-                              qApp->primaryScreen()->availableGeometry().height() - 500);
 
     _name_file->setStyleSheet("font-size:11pt; font-weight: 550;");
     _edit_code->setStyleSheet("font-size:10pt; font-weight: 450;");
@@ -369,24 +402,17 @@ void MainWindow::CreateMainApp()
     textOption.setTabStopDistance(20);
     _edit_code->document()->setDefaultTextOption(textOption);
 
-    QPushButton* But_Remove = new QPushButton(this);
-    QPushButton* But_All_Remove = new QPushButton(this);
+    _But_Remove = new QPushButton(this);
+    _But_All_Remove = new QPushButton(this);
 
-    But_Remove->setText("Remove File");
-    But_All_Remove->setText("Remove All File");
+    _But_Remove->setText("Remove File");
+    _But_All_Remove->setText("Remove All File");
 
-    But_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                            qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
-    But_All_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                                qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+    _But_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
+    _But_All_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
 
-    But_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
-    But_All_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
-
-    But_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
-    But_All_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
-
-    QListWidgetItem* remove_file{};
+    _But_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
+    _But_All_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
 
     connect(_list_widget, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *item){
         if(_path_file.size() != 0)
@@ -398,21 +424,21 @@ void MainWindow::CreateMainApp()
         else
             remove_file = item;
     });
-    connect(But_Remove, &QPushButton::pressed, this, [&](){
-        _list_widget->setEnabled(false);
-
+    connect(_But_Remove, &QPushButton::pressed, this, [&](){
         if(remove_file != nullptr)
         {
+            _list_widget->setEnabled(false);
+
             Remove(remove_file->text());
 
             QListWidgetItem* item = _list_widget->takeItem(_list_widget->row(remove_file));
             delete item;
-        }
-        remove_file = nullptr;
+            remove_file = nullptr;
 
-        _list_widget->setEnabled(true);
+            _list_widget->setEnabled(true);
+        }   
     });
-    connect(But_All_Remove, &QPushButton::pressed, this, [&](){
+    connect(_But_All_Remove, &QPushButton::pressed, this, [&](){
         _list_widget->setEnabled(false);
 
         All_Remove();
@@ -420,4 +446,6 @@ void MainWindow::CreateMainApp()
 
         _list_widget->setEnabled(true);
     });
+
+    setCordsApp(true);
 }

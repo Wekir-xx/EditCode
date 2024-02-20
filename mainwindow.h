@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QList>
 #include <QtWidgets/QListWidget>
+#include <QPushButton>
 
 class MainWindow : public QMainWindow
 {
@@ -28,22 +29,30 @@ private slots:
     void SelectFile(QListWidgetItem *item);
     void Remove(QString remove_file);
     void All_Remove();
+    void setCordsApp(bool tr);
 
 private:
-    QString NameFile(size_t number_file);
+    QString GetNameFile(size_t number_file);
     void PushFile(QString pathfile);
-    void CreateDirectory();
+    void CMD(QStringList& list);
     void CreateMenuBar();
     void CreateMainApp();
 
 private:
+    QLabel* _name_file;
+    QTextEdit* _edit_code;
     QListWidget* _list_widget;
+    QMainWindow* _MW_newfile;
+
+private:
+    QListWidgetItem* remove_file{};
+    QPushButton* _But_Remove;
+    QPushButton* _But_All_Remove;
+
+private:
     QList<QString> _path_file;
     QList<QString> _file_code;
     size_t _index;
-    QLabel* _name_file;
-    QTextEdit* _edit_code;
-    QMainWindow* _MW_newfile;
 };
 
 #endif // MAINWINDOW_H
