@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode");
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode\\file");
+
     CreateMenuBar();
     CreateMainApp();
 }
@@ -61,7 +62,6 @@ void MainWindow::Run()
         compilation<< iter_path;
 
     CMD(compilation << "-o" << main_file);
-
     CMD(QStringList() << "/C" << "start" << main_file);
 
     this->setEnabled(true);
@@ -69,15 +69,18 @@ void MainWindow::Run()
 
 void MainWindow::NewFile()
 {
-    _MW_newfile = new QMainWindow(this);
-    _MW_newfile->setFixedSize(360, 125);
-    _MW_newfile->setWindowIcon(QIcon(":/images/icon.png"));
-    _MW_newfile->setWindowTitle("New File - EditCode");
+    this->setEnabled(false);
 
-    QLabel* text_name = new QLabel(_MW_newfile);
-    QLineEdit* edit_name = new QLineEdit(_MW_newfile);
-    QPushButton* but_create = new QPushButton(_MW_newfile);
-    QPushButton* but_cancel = new QPushButton(_MW_newfile);
+    _dialog_newfile = new QDialog(this);
+    _dialog_newfile->setFixedSize(360, 125);
+    _dialog_newfile->setWindowIcon(QIcon(":/images/icon.png"));
+    _dialog_newfile->setWindowTitle("New File - EditCode");
+    _dialog_newfile->setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    QLabel* text_name = new QLabel(_dialog_newfile);
+    QLineEdit* edit_name = new QLineEdit(_dialog_newfile);
+    QPushButton* but_create = new QPushButton(_dialog_newfile);
+    QPushButton* but_cancel = new QPushButton(_dialog_newfile);
 
     text_name->setText("Name File:");
     edit_name->setText("Application");
@@ -89,14 +92,16 @@ void MainWindow::NewFile()
     but_create->setGeometry(30, 60, 75, 30);
     but_cancel->setGeometry(155, 60, 75, 30);
 
-    this->setEnabled(false);
-    _MW_newfile->setEnabled(true);
-    _MW_newfile->show();
-
+    connect(_dialog_newfile, &QDialog::finished, this, [this](){
+        if(!this->isEnabled())
+            this->setEnabled(true);
+    });
     connect(but_create, &QPushButton::pressed, this, [this, edit_name](){
         NewFile_Create(edit_name->displayText());
     });
     connect(but_cancel, &QPushButton::pressed, this, &MainWindow::NewFile_Cancel);
+
+    _dialog_newfile->show();
 }
 
 void MainWindow::OpenFile()
@@ -118,6 +123,7 @@ void MainWindow::OpenFile()
         {
             auto iter_code = _file_code.begin();
             for(size_t i{}; i < _index; ++i, ++iter_code);
+
             *iter_code = _edit_code->toPlainText();
         }
 
@@ -193,13 +199,13 @@ void MainWindow::NewFile_Create(QString name_new_file)
     if(_path_file.size() == 1)
         SaveFile();
 
-    _MW_newfile->deleteLater();
+    _dialog_newfile->deleteLater();
     this->setEnabled(true);
 }
 
 void MainWindow::NewFile_Cancel()
 {
-    _MW_newfile->deleteLater();
+    _dialog_newfile->deleteLater();
     this->setEnabled(true);
 }
 
@@ -215,6 +221,7 @@ void MainWindow::SelectFile(QListWidgetItem *item)
             {
                 auto new_iter_code = _file_code.begin();
                 for(size_t i{}; i < _index; ++i, ++new_iter_code);
+
                 *new_iter_code = _edit_code->toPlainText();
             }
 
@@ -333,12 +340,14 @@ void MainWindow::CreateMenuBar()
     QAction* left_form = new QAction("&Left Form", this);
     QAction* right_form = new QAction("&Right Form", this);
 
-    QActionGroup* group = new QActionGroup(this);
-    group->setExclusive(true);
     left_form->setCheckable(true);
     right_form->setCheckable(true);
+
+    QActionGroup* group = new QActionGroup(this);
+    group->setExclusive(true);
     left_form->setActionGroup(group);
     right_form->setActionGroup(group);
+
     left_form->setChecked(true);
 
     new_file->setShortcut(tr("CTRL+N"));

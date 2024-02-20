@@ -10,6 +10,7 @@
 #include <QList>
 #include <QtWidgets/QListWidget>
 #include <QPushButton>
+#include <QDialog>
 
 class MainWindow : public QMainWindow
 {
@@ -42,7 +43,7 @@ private:
     QLabel* _name_file;
     QTextEdit* _edit_code;
     QListWidget* _list_widget;
-    QMainWindow* _MW_newfile;
+    QDialog* _dialog_newfile;
 
 private:
     QListWidgetItem* remove_file{};
