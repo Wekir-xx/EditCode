@@ -1,10 +1,10 @@
-#include "mainwindow.h"
+#include "EditCode.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    MainWindow EditCode{};
+    EditCode EditCode{};
 
     EditCode.showMaximized();
 

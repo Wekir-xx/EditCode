@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "EditCode.h"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -10,8 +10,8 @@
 #include <QMessageBox>
 #include <QProcess>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+EditCode::EditCode(QWidget *parent)
+    : QMainWindow{parent}
 {
     this->setWindowTitle("EditCode");
     this->setWindowIcon(QIcon(":/images/icon.png"));
@@ -23,14 +23,16 @@ MainWindow::MainWindow(QWidget *parent)
     CreateMainApp();
 }
 
-MainWindow::~MainWindow()
+EditCode::~EditCode()
 {
     _name_file->deleteLater();
     _edit_code->deleteLater();
+    _number_code->deleteLater();
     _list_widget->deleteLater();
+    delete _observer;
 }
 
-void MainWindow::Run()
+void EditCode::Run()
 {
     if(_path_file.size() == 0)
         NewFile();
@@ -67,7 +69,7 @@ void MainWindow::Run()
     this->setEnabled(true);
 }
 
-void MainWindow::NewFile()
+void EditCode::NewFile()
 {
     this->setEnabled(false);
 
@@ -99,12 +101,12 @@ void MainWindow::NewFile()
     connect(but_create, &QPushButton::pressed, this, [this, edit_name](){
         NewFile_Create(edit_name->displayText());
     });
-    connect(but_cancel, &QPushButton::pressed, this, &MainWindow::NewFile_Cancel);
+    connect(but_cancel, &QPushButton::pressed, this, &EditCode::NewFile_Cancel);
 
     _dialog_newfile->show();
 }
 
-void MainWindow::OpenFile()
+void EditCode::OpenFile()
 {
     this->setEnabled(false);
 
@@ -144,7 +146,7 @@ void MainWindow::OpenFile()
     this->setEnabled(true);
 }
 
-void MainWindow::SaveFile()
+void EditCode::SaveFile()
 {
     if(_path_file.size() == 0)
     {
@@ -171,7 +173,7 @@ void MainWindow::SaveFile()
         _name_file->setText("Not save file");
 }
 
-void MainWindow::NewFile_Create(QString name_new_file)
+void EditCode::NewFile_Create(QString name_new_file)
 {
     if(name_new_file.size() == 0)
         name_new_file = "Application";
@@ -203,13 +205,13 @@ void MainWindow::NewFile_Create(QString name_new_file)
     this->setEnabled(true);
 }
 
-void MainWindow::NewFile_Cancel()
+void EditCode::NewFile_Cancel()
 {
     _dialog_newfile->deleteLater();
     this->setEnabled(true);
 }
 
-void MainWindow::SelectFile(QListWidgetItem *item)
+void EditCode::SelectFile(QListWidgetItem *item)
 {
     auto iter_path = _path_file.begin();
     auto iter_code = _file_code.begin();
@@ -234,7 +236,7 @@ void MainWindow::SelectFile(QListWidgetItem *item)
     }
 }
 
-void MainWindow::Remove(QString remove_file)
+void EditCode::Remove(QString remove_file)
 {
     auto iter_path = _path_file.begin();
     auto iter_code = _file_code.begin();
@@ -252,7 +254,7 @@ void MainWindow::Remove(QString remove_file)
     _index = 0;
 }
 
-void MainWindow::All_Remove()
+void EditCode::All_Remove()
 {
     while(_path_file.size() != 0)
     {
@@ -265,12 +267,12 @@ void MainWindow::All_Remove()
     _list_widget->clear();
 }
 
-void MainWindow::setCordsApp(bool tr)
+void EditCode::setCordsApp(bool tr) const
 {
     if(tr)
     {
-        _name_file->setGeometry(20, 25, 700, 35);
-        _edit_code->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
+        _name_file->setGeometry(100, 25, 700, 35);
+        _splitter->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
                                 qApp->primaryScreen()->availableGeometry().height() - 94);
         _list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
                                   qApp->primaryScreen()->availableGeometry().height() - 500);
@@ -281,8 +283,8 @@ void MainWindow::setCordsApp(bool tr)
     }
     else
     {
-        _name_file->setGeometry(350, 25, 700, 35);
-        _edit_code->setGeometry(340, 55, qApp->primaryScreen()->availableGeometry().width() - 354,
+        _name_file->setGeometry(430, 25, 700, 35);
+        _splitter->setGeometry(340, 55, qApp->primaryScreen()->availableGeometry().width() - 354,
                                 qApp->primaryScreen()->availableGeometry().height() - 94);
         _list_widget->setGeometry(10, 55, 320, qApp->primaryScreen()->availableGeometry().height() - 500);
         _But_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
@@ -291,7 +293,7 @@ void MainWindow::setCordsApp(bool tr)
 }
 
 
-QString MainWindow::GetNameFile(size_t number_file)
+QString EditCode::GetNameFile(size_t number_file) const
 {
     auto iter_path = _path_file.begin();
     for(size_t i{}; i < number_file; ++i, ++iter_path);
@@ -302,7 +304,7 @@ QString MainWindow::GetNameFile(size_t number_file)
     return iter_path->right(i);
 }
 
-void MainWindow::PushFile(QString path_new_file)
+void EditCode::PushFile(QString path_new_file)
 {
     auto iter_path = _path_file.begin();
     for(qint8 i{}; i < _path_file.size(); ++i, ++iter_path)
@@ -321,14 +323,14 @@ void MainWindow::PushFile(QString path_new_file)
     _list_widget->addItem(new QListWidgetItem(QIcon(":/images/list_icon.png"), GetNameFile(_index)));
 }
 
-void MainWindow::CMD(QStringList& list)
+void EditCode::CMD(QStringList& list)
 {
     QProcess myProcess(this);
     myProcess.start("cmd", list);
     myProcess.waitForFinished();
 }
 
-void MainWindow::CreateMenuBar()
+void EditCode::CreateMenuBar()
 {
     menuBar()->setStyleSheet("background-color: #D3D3D3");
 
@@ -359,10 +361,10 @@ void MainWindow::CreateMenuBar()
     right_form->setShortcut(tr("ALT+SHIFT+0"));
 
     connect(quit, &QAction::triggered, this, &QApplication::quit);
-    connect(new_file, &QAction::triggered, this, &MainWindow::NewFile);
-    connect(open_file, &QAction::triggered, this, &MainWindow::OpenFile);
-    connect(save_file, &QAction::triggered, this, &MainWindow::SaveFile);
-    connect(run, &QAction::triggered, this, &MainWindow::Run);
+    connect(new_file, &QAction::triggered, this, &EditCode::NewFile);
+    connect(open_file, &QAction::triggered, this, &EditCode::OpenFile);
+    connect(save_file, &QAction::triggered, this, &EditCode::SaveFile);
+    connect(run, &QAction::triggered, this, &EditCode::Run);
     connect(left_form, &QAction::triggered, this, [this](){
         this->setEnabled(false);
 
@@ -391,21 +393,42 @@ void MainWindow::CreateMenuBar()
     view_bar->addAction(left_form);
     view_bar->addAction(right_form);
 
-    file_bar->setStyleSheet("QMenu::item:selected { background-color: #A9A9A9;"
+    file_bar->setStyleSheet("QMenu::item:selected{"
+                            "background-color: #A9A9A9;"
                             "color: black; }");
-    view_bar->setStyleSheet("QMenu::item:selected { background-color: #A9A9A9;"
+    view_bar->setStyleSheet("QMenu::item:selected {"
+                            "background-color: #A9A9A9;"
                             "color: black; }");
 }
 
-void MainWindow::CreateMainApp()
+void EditCode::CreateMainApp()
 {
     _name_file = new QLabel(this);
+    _splitter = new QSplitter(this);
     _edit_code = new QTextEdit(this);
+    _number_code = new QTextEdit(this);
     _list_widget = new QListWidget(this);
 
-    _name_file->setStyleSheet("font-size:11pt; font-weight: 550;");
-    _edit_code->setStyleSheet("font-size:10pt; font-weight: 450;");
-    _list_widget->setStyleSheet("font-size:10pt; font-weight: 550;");
+    _observer = new TextEditObserver(_edit_code, _number_code);
+
+    _splitter->addWidget(_number_code);
+    _splitter->addWidget(_edit_code);
+    _splitter->setHandleWidth(0);
+    _splitter->setSizes(QList<int>() << 30 << 1800);
+
+    _name_file->setStyleSheet("font-size:11pt;"
+                              "font-weight: 550;");
+    _edit_code->setStyleSheet("font-size:10pt;"
+                              "font-weight: 450;");
+    _number_code->setStyleSheet("font-size: 10pt;"
+                                "font-weight: 500;");
+    _list_widget->setStyleSheet("font-size:10pt;"
+                                "font-weight: 550;");
+
+    _number_code->insertHtml("<div align=\"right\">"
+                             + QString::number(1) + "</div><br>");
+    _number_code->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _number_code->setReadOnly(true);
 
     QTextOption textOption = _edit_code->document()->defaultTextOption();
     textOption.setTabStopDistance(20);
@@ -417,8 +440,10 @@ void MainWindow::CreateMainApp()
     _But_Remove->setText("Remove File");
     _But_All_Remove->setText("Remove All File");
 
-    _But_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
-    _But_All_Remove->setStyleSheet("font-size:10pt; font-weight: 500;");
+    _But_Remove->setStyleSheet("font-size:10pt;"
+                               "font-weight: 500;");
+    _But_All_Remove->setStyleSheet("font-size:10pt;"
+                                   "font-weight: 500;");
 
     _But_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
     _But_All_Remove->setShortcut(QKeySequence(Qt::Key_Delete));

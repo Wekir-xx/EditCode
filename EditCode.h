@@ -1,9 +1,10 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef EDITCODE_H
+#define EDITCODE_H
+
+#include <TextEditObserver.h>
 
 #include <QMainWindow>
 #include <QString>
-#include <QTextEdit>
 #include <QLabel>
 #include <QApplication>
 #include <QLineEdit>
@@ -11,14 +12,15 @@
 #include <QtWidgets/QListWidget>
 #include <QPushButton>
 #include <QDialog>
+#include <QSplitter>
 
-class MainWindow : public QMainWindow
+class EditCode : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    EditCode(QWidget *parent = nullptr);
+    ~EditCode();
 
 private slots:
     void Run();
@@ -30,18 +32,21 @@ private slots:
     void SelectFile(QListWidgetItem *item);
     void Remove(QString remove_file);
     void All_Remove();
-    void setCordsApp(bool tr);
+    void setCordsApp(bool tr) const;
 
 private:
-    QString GetNameFile(size_t number_file);
+    QString GetNameFile(size_t number_file) const;
     void PushFile(QString pathfile);
     void CMD(QStringList& list);
     void CreateMenuBar();
     void CreateMainApp();
 
 private:
+    TextEditObserver* _observer;
+    QSplitter* _splitter;
     QLabel* _name_file;
     QTextEdit* _edit_code;
+    QTextEdit* _number_code;
     QListWidget* _list_widget;
     QDialog* _dialog_newfile;
 
@@ -56,4 +61,4 @@ private:
     size_t _index;
 };
 
-#endif // MAINWINDOW_H
+#endif // EDITCODE_H
