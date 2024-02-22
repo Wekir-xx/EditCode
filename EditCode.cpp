@@ -15,6 +15,7 @@ EditCode::EditCode(QWidget *parent)
 {
     this->setWindowTitle("EditCode");
     this->setWindowIcon(QIcon(":/images/icon.png"));
+    this->resize(1100, 700);
 
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode");
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode\\file");
@@ -273,19 +274,19 @@ void EditCode::setCordsApp(bool tr) const
     {
         _name_file->setGeometry(100, 25, 700, 35);
         _splitter->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
-                                qApp->primaryScreen()->availableGeometry().height() - 94);
+                               qApp->primaryScreen()->availableGeometry().height() - 94);
         _list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
                                   qApp->primaryScreen()->availableGeometry().height() - 500);
         _But_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                                qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
+                                 qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
         _But_All_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                                    qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+                                     qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
     }
     else
     {
         _name_file->setGeometry(430, 25, 700, 35);
         _splitter->setGeometry(340, 55, qApp->primaryScreen()->availableGeometry().width() - 354,
-                                qApp->primaryScreen()->availableGeometry().height() - 94);
+                               qApp->primaryScreen()->availableGeometry().height() - 94);
         _list_widget->setGeometry(10, 55, 320, qApp->primaryScreen()->availableGeometry().height() - 500);
         _But_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
         _But_All_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
@@ -470,7 +471,7 @@ void EditCode::CreateMainApp()
             remove_file = nullptr;
 
             _list_widget->setEnabled(true);
-        }   
+        }
     });
     connect(_But_All_Remove, &QPushButton::pressed, this, [&](){
         _list_widget->setEnabled(false);
