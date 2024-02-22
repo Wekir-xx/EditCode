@@ -28,33 +28,28 @@ void TextEditObserver::ChangeCountString()
 {
     size_t count_string = _edit_code->toPlainText().count("\n") + 1;
 
-    if(_count_string < count_string)
-    {
-        while (_count_string < count_string)
-            _number_code->insertHtml("<div align=\"right\">" +
-                                     QString::number(++_count_string) + "</div><br>");
+    while (_count_string < count_string)
+        _number_code->insertHtml("<div align=\"right\">" +
+                                 QString::number(++_count_string) + "</div><br>");
 
-        _number_scroll_bar->setValue(_edit_scroll_bar->value());
-    }
-    else if(_count_string > count_string)
+    while (_count_string > count_string)
     {
-        while (_count_string > count_string)
+        QTextCursor cursor(_number_code->document());
+
+        cursor.movePosition(QTextCursor::End);
+        cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+
+        if (!cursor.selectedText().isEmpty())
         {
-            QTextCursor cursor(_number_code->document());
-            cursor.movePosition(QTextCursor::End);
-            cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
-            cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+            cursor.movePosition(QTextCursor::StartOfLine);
+            cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+            cursor.removeSelectedText();
 
-            if (!cursor.selectedText().isEmpty())
-            {
-                cursor.movePosition(QTextCursor::StartOfLine);
-                cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-                cursor.removeSelectedText();
-                cursor.deleteChar();
-            }
-            --_count_string;
+            cursor.deleteChar();
         }
-        _number_scroll_bar->setValue(_edit_scroll_bar->value());
-    }
 
+        --_count_string;
+    }
+    _number_scroll_bar->setValue(_edit_scroll_bar->value());
 }

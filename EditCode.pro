@@ -10,11 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
     EditCode.cpp \
+    HighLighter.cpp \
     TextEditObserver.cpp \
     main.cpp
 
 HEADERS += \
     EditCode.h \
+    HighLighter.h \
     TextEditObserver.h
 
 FORMS +=

@@ -2,6 +2,7 @@
 #define EDITCODE_H
 
 #include <TextEditObserver.h>
+#include <HighLighter.h>
 
 #include <QMainWindow>
 #include <QString>
@@ -42,6 +43,7 @@ private:
     void CreateMainApp();
 
 private:
+    HighLighter* _lighter;
     TextEditObserver* _observer;
     QSplitter* _splitter;
     QLabel* _name_file;

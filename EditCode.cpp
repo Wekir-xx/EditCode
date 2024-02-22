@@ -22,6 +22,10 @@ EditCode::EditCode(QWidget *parent)
 
     CreateMenuBar();
     CreateMainApp();
+
+    _observer = new TextEditObserver(_edit_code, _number_code);
+
+    _lighter = new HighLighter(_edit_code->document());
 }
 
 EditCode::~EditCode()
@@ -343,14 +347,13 @@ void EditCode::CreateMenuBar()
     QAction* left_form = new QAction("&Left Form", this);
     QAction* right_form = new QAction("&Right Form", this);
 
-    left_form->setCheckable(true);
-    right_form->setCheckable(true);
-
     QActionGroup* group = new QActionGroup(this);
     group->setExclusive(true);
-    left_form->setActionGroup(group);
-    right_form->setActionGroup(group);
 
+    right_form->setCheckable(true);
+    right_form->setActionGroup(group);
+    left_form->setCheckable(true);
+    left_form->setActionGroup(group);
     left_form->setChecked(true);
 
     new_file->setShortcut(tr("CTRL+N"));
@@ -409,8 +412,6 @@ void EditCode::CreateMainApp()
     _edit_code = new QTextEdit(this);
     _number_code = new QTextEdit(this);
     _list_widget = new QListWidget(this);
-
-    _observer = new TextEditObserver(_edit_code, _number_code);
 
     _splitter->addWidget(_number_code);
     _splitter->addWidget(_edit_code);
