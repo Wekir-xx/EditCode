@@ -1,5 +1,6 @@
 #include "EditCode.h"
 
+#include <QVBoxLayout>
 #include <QMenuBar>
 #include <QMenu>
 #include <QIcon>
@@ -11,7 +12,7 @@
 #include <QProcess>
 
 EditCode::EditCode(QWidget *parent)
-    : QMainWindow{parent}
+    : QWidget{parent}
 {
     this->setWindowTitle("EditCode");
     this->setWindowIcon(QIcon(":/images/icon.png"));
@@ -20,21 +21,21 @@ EditCode::EditCode(QWidget *parent)
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode");
     CMD(QStringList() << "/C" << "mkdir" << "C:\\EditCode\\file");
 
+    _VLayout = new QVBoxLayout(this);
+
     CreateMenuBar();
     CreateMainApp();
 
     _observer = new TextEditObserver(_edit_code, _number_code);
-
     _lighter = new HighLighter(_edit_code->document());
+
+    this->setLayout(_VLayout);
 }
 
 EditCode::~EditCode()
 {
-    _name_file->deleteLater();
-    _edit_code->deleteLater();
-    _number_code->deleteLater();
-    _list_widget->deleteLater();
     delete _observer;
+    delete _lighter;
 }
 
 void EditCode::Run()
@@ -52,6 +53,7 @@ void EditCode::Run()
         _index = i;
         SaveFile();
     }
+
     _index = time_index;
 
     QString main_file = GetNameFile(0);
@@ -59,7 +61,7 @@ void EditCode::Run()
     for(auto rev_iter = main_file.begin(); *rev_iter != '.'; ++rev_iter, ++i);
 
     main_file = main_file.left(i);
-    main_file = "C:/EditCode/file/" + main_file + ".exe";
+    main_file = "C:\\EditCode\\file\\" + main_file + ".exe";
 
     QStringList compilation{};
 
@@ -68,6 +70,7 @@ void EditCode::Run()
     for(auto& iter_path : _path_file)
         compilation<< iter_path;
 
+    CMD(QStringList() << "/C" << "del" << "/f" << "/q" << main_file);
     CMD(compilation << "-o" << main_file);
     CMD(QStringList() << "/C" << "start" << main_file);
 
@@ -272,29 +275,39 @@ void EditCode::All_Remove()
     _list_widget->clear();
 }
 
-void EditCode::setCordsApp(bool tr) const
+void EditCode::setCordsApp()
 {
-    if(tr)
+    if(_form)
     {
-        _name_file->setGeometry(100, 25, 700, 35);
-        _splitter->setGeometry(10, 55, qApp->primaryScreen()->availableGeometry().width() - 350,
-                               qApp->primaryScreen()->availableGeometry().height() - 94);
-        _list_widget->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330, 55, 320,
-                                  qApp->primaryScreen()->availableGeometry().height() - 500);
-        _But_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                                 qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
-        _But_All_Remove->setGeometry(qApp->primaryScreen()->availableGeometry().width() - 330,
-                                     qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+        _HLayout->removeItem(_HLayout->takeAt(0));
+        _HLayout->removeItem(_HLayout->takeAt(0));
+        auto item = _HLayout_name->takeAt(0);
+        delete item->widget();
+        delete item;
+
+        _HLayout->addWidget(_splitter);
+        _HLayout->addLayout(_VLayout_list);
+
+        _spacer = new QSpacerItem(_number_code->width() * 1.1, 0);
+        _HLayout_name->insertSpacerItem(0, _spacer);
     }
     else
     {
-        _name_file->setGeometry(430, 25, 700, 35);
-        _splitter->setGeometry(340, 55, qApp->primaryScreen()->availableGeometry().width() - 354,
-                               qApp->primaryScreen()->availableGeometry().height() - 94);
-        _list_widget->setGeometry(10, 55, 320, qApp->primaryScreen()->availableGeometry().height() - 500);
-        _But_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 435, 320, 40);
-        _But_All_Remove->setGeometry(10, qApp->primaryScreen()->availableGeometry().height() - 385, 320, 40);
+        _HLayout->removeItem(_HLayout->takeAt(0));
+        _HLayout->removeItem(_HLayout->takeAt(0));
+        auto item = _HLayout_name->takeAt(0);
+        delete item->widget();
+        delete item;
+
+        _HLayout->addLayout(_VLayout_list);
+        _HLayout->addWidget(_splitter);
+
+        _spacer = new QSpacerItem(_list_widget->width() + _number_code->width() * 1.2, 0);
+        _HLayout_name->insertSpacerItem(0, _spacer);
     }
+
+    _HLayout->setStretchFactor(_splitter, 5);
+    _HLayout->setStretchFactor(_VLayout_list, 1);
 }
 
 
@@ -329,7 +342,7 @@ void EditCode::PushFile(QString path_new_file)
 }
 
 void EditCode::CMD(QStringList& list)
-{
+{   
     QProcess myProcess(this);
     myProcess.start("cmd", list);
     myProcess.waitForFinished();
@@ -337,7 +350,11 @@ void EditCode::CMD(QStringList& list)
 
 void EditCode::CreateMenuBar()
 {
-    menuBar()->setStyleSheet("background-color: #D3D3D3");
+    QMenuBar* menuBar = new QMenuBar(this);
+    menuBar->setGeometry(0, 0, this->maximumWidth(), 30);
+    menuBar->setStyleSheet("background-color: #D3D3D3");
+
+    _VLayout->setMenuBar(menuBar);
 
     QAction *new_file = new QAction(QIcon(":/images/new.png"), "&New File", this);
     QAction *open_file = new QAction(QIcon(":/images/open.png"), "&Open File", this);
@@ -351,10 +368,11 @@ void EditCode::CreateMenuBar()
     group->setExclusive(true);
 
     right_form->setCheckable(true);
-    right_form->setActionGroup(group);
     left_form->setCheckable(true);
+    right_form->setActionGroup(group);
     left_form->setActionGroup(group);
     left_form->setChecked(true);
+    _form = true;
 
     new_file->setShortcut(tr("CTRL+N"));
     open_file->setShortcut(tr("CTRL+O"));
@@ -372,21 +390,29 @@ void EditCode::CreateMenuBar()
     connect(left_form, &QAction::triggered, this, [this](){
         this->setEnabled(false);
 
-        setCordsApp(true);
+        if(!_form)
+        {
+            _form = true;
+            setCordsApp();
+        }
 
         this->setEnabled(true);
     });
     connect(right_form, &QAction::triggered, this, [this](){
         this->setEnabled(false);
 
-        setCordsApp(false);
+        if(_form)
+        {
+            _form = false;
+            setCordsApp();
+        }
 
         this->setEnabled(true);
     });
 
-    QMenu *file_bar = menuBar()->addMenu("File");
-    menuBar()->addAction(run);
-    QMenu *view_bar = menuBar()->addMenu("View");
+    QMenu *file_bar = menuBar->addMenu("File");
+    menuBar->addAction(run);
+    QMenu *view_bar = menuBar->addMenu("View");
 
     file_bar->addAction(new_file);
     file_bar->addAction(open_file);
@@ -483,5 +509,32 @@ void EditCode::CreateMainApp()
         _list_widget->setEnabled(true);
     });
 
-    setCordsApp(true);
+    _VLayout_list = new QVBoxLayout{};
+
+    _VLayout_list->addWidget(_list_widget);
+    _VLayout_list->addWidget(_But_Remove);
+    _VLayout_list->addWidget(_But_All_Remove);
+
+    QSpacerItem* space = new QSpacerItem(0, 1.2 * _VLayout_list->sizeHint().height());
+    _VLayout_list->addSpacerItem(space);
+
+    _HLayout = new QHBoxLayout{};
+
+    _HLayout->addWidget(_splitter);
+    _HLayout->addLayout(_VLayout_list);
+
+    _HLayout->setStretchFactor(_splitter, 5);
+    _HLayout->setStretchFactor(_VLayout_list, 1);
+
+    _HLayout_name = new QHBoxLayout{};
+
+    _HLayout_name->addWidget(_name_file);
+    _spacer = new QSpacerItem(_number_code->width() * 1.8, 0);
+    _HLayout_name->insertSpacerItem(0, _spacer);
+
+    _VLayout->addLayout(_HLayout_name);
+    _VLayout->addLayout(_HLayout);
+
+    _VLayout->setStretchFactor(_HLayout_name, 1);
+    _VLayout->setStretchFactor(_HLayout, 50);
 }

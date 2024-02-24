@@ -11,7 +11,7 @@ class HighLighter : public QSyntaxHighlighter
 public:
     HighLighter(QTextDocument *parent = nullptr);
 
-protected:
+private:
     void highlightBlock(const QString &text) override;
 
 private:
@@ -21,17 +21,23 @@ private:
         QTextCharFormat format;
     };
 
-    QList<HighlightingRule> highlightingRules;
+    QList<HighlightingRule> HighHightingRules;
 
     QRegularExpression commentStartExpression;
     QRegularExpression commentEndExpression;
 
-    QTextCharFormat keywordFormat;
-    QTextCharFormat classFormat;
-    QTextCharFormat singleLineCommentFormat;
-    QTextCharFormat multiLineCommentFormat;
-    QTextCharFormat quotationFormat;
-    QTextCharFormat functionFormat;
+    QTextCharFormat TypeFormat;
+    QTextCharFormat BoolFormat;
+    QTextCharFormat SpecialFormat;
+    QTextCharFormat OtherSpecialFormat;
+    QTextCharFormat PreProcessFormat;
+    QTextCharFormat SemiliconFormat;
+    QTextCharFormat FunctionFormat;
+    QTextCharFormat QtFormat;
+    QTextCharFormat QuotationFormat;
+    QTextCharFormat TriangleBracketsFormat;
+    QTextCharFormat SingleLineCommentFormat;
+    QTextCharFormat MultiLineCommentFormat;
 };
 
 #endif // HIGHLIGHTER_H

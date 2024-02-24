@@ -4,9 +4,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    EditCode EditCode{};
+    EditCode window{};
 
-    EditCode.showMaximized();
+    window.showMaximized();
 
     return a.exec();
 }

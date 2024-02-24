@@ -39,15 +39,11 @@ void TextEditObserver::ChangeCountString()
         cursor.movePosition(QTextCursor::End);
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+        cursor.movePosition(QTextCursor::StartOfLine);
+        cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
 
-        if (!cursor.selectedText().isEmpty())
-        {
-            cursor.movePosition(QTextCursor::StartOfLine);
-            cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-            cursor.removeSelectedText();
-
-            cursor.deleteChar();
-        }
+        cursor.removeSelectedText();
+        cursor.deleteChar();
 
         --_count_string;
     }
