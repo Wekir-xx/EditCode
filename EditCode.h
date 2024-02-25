@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QString>
+#include <QMenuBar>
 #include <QLabel>
 #include <QApplication>
 #include <QLineEdit>
@@ -36,11 +37,13 @@ private slots:
     void Remove(QString remove_file);
     void All_Remove();
     void setFormApp();
+    void setStyleApp();
 
 private:
     QString GetNameFile(size_t number_file) const;
     void PushFile(QString pathfile);
     void CMD(QStringList& list);
+    void ChangeImage();
     void CreateMenuBar();
     void CreateMainApp();
 
@@ -54,14 +57,26 @@ private:
     QVBoxLayout* _VLayout_list;
     QHBoxLayout* _HLayout_name;
     QSpacerItem* _spacer;
+
+private:
+    QMenuBar* _menuBar;
+    QMenu* _file_bar;
+    QMenu* _views_bar;
+    QDialog* _dialog_newfile;
     bool _layout_form;
+    bool _color_style;
+
+private:
+    QString _list_icon;
+    QAction* new_file;
+    QAction* open_file;
+    QAction* save_file;
 
 private:
     QSplitter* _splitter;
     QLabel* _name_file;
     QTextEdit* _edit_code;
     QTextEdit* _number_code;
-    QDialog* _dialog_newfile;
 
 private:
     QListWidget* _list_widget;

@@ -6,6 +6,8 @@ TextEditObserver::TextEditObserver(QTextEdit *edit_code, QTextEdit *number_code)
     : _edit_code{edit_code},
     _number_code{number_code}
 {
+    _number_code->insertPlainText("   " + QString::number(1) + "\n");
+
     _edit_scroll_bar = _edit_code->verticalScrollBar();
     _number_scroll_bar = _number_code->verticalScrollBar();
 
@@ -29,8 +31,7 @@ void TextEditObserver::ChangeCountString()
     size_t count_string = _edit_code->toPlainText().count("\n") + 1;
 
     while (_count_string < count_string)
-        _number_code->insertHtml("<div align=\"right\">" +
-                                 QString::number(++_count_string) + "</div><br>");
+        _number_code->insertPlainText("   " + QString::number(++_count_string) + "\n");
 
     while (_count_string > count_string)
     {

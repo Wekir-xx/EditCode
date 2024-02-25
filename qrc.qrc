@@ -1,9 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file>images/icon.png</file>
-        <file>images/new.png</file>
-        <file>images/open.png</file>
-        <file>images/save.png</file>
-        <file>images/list_icon.png</file>
+        <file>images/black_theme/list_icon.png</file>
+        <file>images/white_theme/list_icon.png</file>
+        <file>images/white_theme/new.png</file>
+        <file>images/white_theme/open.png</file>
+        <file>images/white_theme/save.png</file>
+        <file>images/black_theme/new.png</file>
+        <file>images/black_theme/open.png</file>
+        <file>images/black_theme/save.png</file>
     </qresource>
 </RCC>
