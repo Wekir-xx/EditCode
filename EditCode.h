@@ -35,7 +35,7 @@ private slots:
     void SelectFile(QListWidgetItem *item);
     void Remove(QString remove_file);
     void All_Remove();
-    void setCordsApp();
+    void setFormApp();
 
 private:
     QString GetNameFile(size_t number_file) const;
@@ -54,7 +54,7 @@ private:
     QVBoxLayout* _VLayout_list;
     QHBoxLayout* _HLayout_name;
     QSpacerItem* _spacer;
-    bool _form;
+    bool _layout_form;
 
 private:
     QSplitter* _splitter;

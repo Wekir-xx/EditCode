@@ -40,9 +40,9 @@ EditCode::~EditCode()
 
 void EditCode::Run()
 {
-    if(_path_file.size() == 0)
+    if(_path_file.isEmpty())
         NewFile();
-    if(_path_file.size() == 0)
+    if(_path_file.isEmpty())
         return;
 
     this->setEnabled(false);
@@ -120,7 +120,7 @@ void EditCode::OpenFile()
 
     QString path_new_file = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"));
 
-    if(path_new_file.size() == 0)
+    if(path_new_file.isEmpty())
     {
         this->setEnabled(true);
         return;
@@ -129,7 +129,7 @@ void EditCode::OpenFile()
     QFile file(path_new_file);
     if (file.open(QIODevice::ReadOnly))
     {
-        if(_path_file.size() != 0)
+        if(!_path_file.isEmpty())
         {
             auto iter_code = _file_code.begin();
             for(size_t i{}; i < _index; ++i, ++iter_code);
@@ -156,7 +156,7 @@ void EditCode::OpenFile()
 
 void EditCode::SaveFile()
 {
-    if(_path_file.size() == 0)
+    if(_path_file.isEmpty())
     {
         NewFile();
         return;
@@ -183,7 +183,7 @@ void EditCode::SaveFile()
 
 void EditCode::NewFile_Create(QString name_new_file)
 {
-    if(name_new_file.size() == 0)
+    if(name_new_file.isEmpty())
         name_new_file = "Application";
 
     QFile file("C:/EditCode/file/" + name_new_file + ".cpp");
@@ -191,7 +191,7 @@ void EditCode::NewFile_Create(QString name_new_file)
     {
         file.close();
 
-        if (_path_file.size() != 0)
+        if (!_path_file.isEmpty())
         {
             auto iter_code = _file_code.begin();
             for(size_t i{}; i < _index; ++i, ++iter_code);
@@ -264,7 +264,7 @@ void EditCode::Remove(QString remove_file)
 
 void EditCode::All_Remove()
 {
-    while(_path_file.size() != 0)
+    while(!_path_file.isEmpty())
     {
         _path_file.pop_front();
         _file_code.pop_front();
@@ -275,9 +275,9 @@ void EditCode::All_Remove()
     _list_widget->clear();
 }
 
-void EditCode::setCordsApp()
+void EditCode::setFormApp()
 {
-    if(_form)
+    if(_layout_form)
     {
         _HLayout->removeItem(_HLayout->takeAt(0));
         _HLayout->removeItem(_HLayout->takeAt(0));
@@ -372,7 +372,7 @@ void EditCode::CreateMenuBar()
     right_form->setActionGroup(group);
     left_form->setActionGroup(group);
     left_form->setChecked(true);
-    _form = true;
+    _layout_form = true;
 
     new_file->setShortcut(tr("CTRL+N"));
     open_file->setShortcut(tr("CTRL+O"));
@@ -390,10 +390,10 @@ void EditCode::CreateMenuBar()
     connect(left_form, &QAction::triggered, this, [this](){
         this->setEnabled(false);
 
-        if(!_form)
+        if(!_layout_form)
         {
-            _form = true;
-            setCordsApp();
+            _layout_form = true;
+            setFormApp();
         }
 
         this->setEnabled(true);
@@ -401,10 +401,10 @@ void EditCode::CreateMenuBar()
     connect(right_form, &QAction::triggered, this, [this](){
         this->setEnabled(false);
 
-        if(_form)
+        if(_layout_form)
         {
-            _form = false;
-            setCordsApp();
+            _layout_form = false;
+            setFormApp();
         }
 
         this->setEnabled(true);
@@ -412,7 +412,7 @@ void EditCode::CreateMenuBar()
 
     QMenu *file_bar = menuBar->addMenu("File");
     menuBar->addAction(run);
-    QMenu *view_bar = menuBar->addMenu("View");
+    QMenu *views_bar = menuBar->addMenu("Views");
 
     file_bar->addAction(new_file);
     file_bar->addAction(open_file);
@@ -420,13 +420,13 @@ void EditCode::CreateMenuBar()
     file_bar->addSeparator();
     file_bar->addAction(quit);
 
-    view_bar->addAction(left_form);
-    view_bar->addAction(right_form);
+    views_bar->addAction(left_form);
+    views_bar->addAction(right_form);
 
     file_bar->setStyleSheet("QMenu::item:selected{"
                             "background-color: #A9A9A9;"
                             "color: black; }");
-    view_bar->setStyleSheet("QMenu::item:selected {"
+    views_bar->setStyleSheet("QMenu::item:selected {"
                             "background-color: #A9A9A9;"
                             "color: black; }");
 }
@@ -477,16 +477,16 @@ void EditCode::CreateMainApp()
     _But_All_Remove->setShortcut(QKeySequence(Qt::Key_Delete));
 
     connect(_list_widget, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *item){
-        if(_path_file.size() != 0)
+        if(!_path_file.isEmpty())
             SelectFile(item);
     });
-    connect(_list_widget, &QListWidget::itemClicked, [&](QListWidgetItem *item){
+    connect(_list_widget, &QListWidget::itemClicked, [this](QListWidgetItem *item){
         if(remove_file == item)
             remove_file = nullptr;
         else
             remove_file = item;
     });
-    connect(_But_Remove, &QPushButton::pressed, this, [&](){
+    connect(_But_Remove, &QPushButton::pressed, this, [this](){
         if(remove_file != nullptr)
         {
             _list_widget->setEnabled(false);
@@ -500,7 +500,7 @@ void EditCode::CreateMainApp()
             _list_widget->setEnabled(true);
         }
     });
-    connect(_But_All_Remove, &QPushButton::pressed, this, [&](){
+    connect(_But_All_Remove, &QPushButton::pressed, this, [this](){
         _list_widget->setEnabled(false);
 
         All_Remove();

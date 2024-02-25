@@ -149,7 +149,7 @@ void HighLighter::highlightBlock(const QString &text)
     }
 
     setCurrentBlockState(0);
-    int startIndex = 0;
+    int startIndex{};
 
     if (previousBlockState() != 1)
         startIndex = text.indexOf(commentStartExpression);
@@ -158,7 +158,7 @@ void HighLighter::highlightBlock(const QString &text)
     {
         QRegularExpressionMatch match = commentEndExpression.match(text, startIndex);
         int endIndex = match.capturedStart();
-        int commentLength = 0;
+        int commentLength{};
 
         if (endIndex == -1)
         {

@@ -20,12 +20,14 @@ private:
         QRegularExpression pattern;
         QTextCharFormat format;
     };
-
     QList<HighlightingRule> HighHightingRules;
 
+private:
     QRegularExpression commentStartExpression;
     QRegularExpression commentEndExpression;
+    QTextCharFormat MultiLineCommentFormat;
 
+private:
     QTextCharFormat TypeFormat;
     QTextCharFormat BoolFormat;
     QTextCharFormat SpecialFormat;
@@ -37,7 +39,6 @@ private:
     QTextCharFormat QuotationFormat;
     QTextCharFormat TriangleBracketsFormat;
     QTextCharFormat SingleLineCommentFormat;
-    QTextCharFormat MultiLineCommentFormat;
 };
 
 #endif // HIGHLIGHTER_H
