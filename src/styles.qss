@@ -30,6 +30,10 @@ QMenuBar#QMenuBarBlack::item:pressed
     background-color: #696969;
 }
 
+QMenu#QMenuWhite
+{
+    background-color: #DCDCDC;
+}
 QMenu#QMenuWhite::item:selected
 {
     background-color: #C0C0C0;
