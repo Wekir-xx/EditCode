@@ -10,6 +10,7 @@ class HighLighter : public QSyntaxHighlighter
 
 public:
     HighLighter(QTextDocument *parent = nullptr);
+    void ChangeTheme(bool _color_style);
 
 private:
     void highlightBlock(const QString &text) override;

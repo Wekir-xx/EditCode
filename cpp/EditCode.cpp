@@ -24,11 +24,12 @@ EditCode::EditCode(QWidget *parent)
 
     CreateMenuBar();
     CreateMainApp();
-    setFormApp();
-    setStyleApp();
 
     _observer = new TextEditObserver(_edit_code, _number_code);
     _lighter = new HighLighter(_edit_code->document());
+
+    setFormApp();
+    setStyleApp();
 }
 
 EditCode::~EditCode()
@@ -314,6 +315,7 @@ void EditCode::setFormApp()
 void EditCode::setStyleApp()
 {
     ChangeImage();
+    _lighter->ChangeTheme(_color_style);
 
     if(_color_style)
     {

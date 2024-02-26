@@ -1,11 +1,37 @@
 #include "header/HighLighter.h"
 
-HighLighter::HighLighter(QTextDocument *parent)
+HighLighter::HighLighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
-    HighlightingRule rule;
+    BoolFormat.setForeground(Qt::darkRed);
+    BoolFormat.setFontWeight(QFont::Bold);
 
-    TypeFormat.setForeground(Qt::darkBlue);
+    OtherSpecialFormat.setForeground(Qt::blue);
+
+    PreProcessFormat.setForeground(Qt::darkGray);
+    PreProcessFormat.setFontWeight(QFont::Bold);
+
+    SemiliconFormat.setFontWeight(QFont::Bold);
+
+    FunctionFormat.setFontItalic(true);
+
+    QuotationFormat.setForeground(Qt::darkRed);
+    QuotationFormat.setFontItalic(true);
+
+    TriangleBracketsFormat.setForeground(Qt::darkMagenta);
+
+    SingleLineCommentFormat.setForeground(Qt::darkGreen);
+
+    MultiLineCommentFormat.setForeground(Qt::darkGreen);
+
+    commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
+    commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+}
+
+void HighLighter::ChangeTheme(bool _color_style)
+{
+    HighlightingRule rule;
+    HighHightingRules.clear();
 
     const QString keywordTypePatterns[] =
         {
@@ -18,32 +44,10 @@ HighLighter::HighLighter(QTextDocument *parent)
             QStringLiteral("\\bsize_t\\b")
         };
 
-
-    for (const QString &pattern : keywordTypePatterns)
-    {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = TypeFormat;
-        HighHightingRules.append(rule);
-    }
-
-    BoolFormat.setForeground(Qt::darkRed);
-    BoolFormat.setFontWeight(QFont::Bold);
-    BoolFormat.setFontItalic(true);
-
     const QString keywordBoolPatterns[] =
         {
             QStringLiteral("\\bfalse\\b"), QStringLiteral("\\btrue\\b"), QStringLiteral("\\bbool\\b"),
         };
-
-    for (const QString &pattern : keywordBoolPatterns)
-    {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = BoolFormat;
-        HighHightingRules.append(rule);
-    }
-
-    SpecialFormat.setForeground(Qt::darkBlue);
-    SpecialFormat.setFontWeight(QFont::Bold);
 
     const QString keywordSpecialPatterns[] =
         {
@@ -54,31 +58,11 @@ HighLighter::HighLighter(QTextDocument *parent)
             QStringLiteral("\\bsignals\\b"), QStringLiteral("\\benum\\b")
         };
 
-    for (const QString &pattern : keywordSpecialPatterns)
-    {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = SpecialFormat;
-        HighHightingRules.append(rule);
-    }
-
-    OtherSpecialFormat.setForeground(Qt::blue);
-    OtherSpecialFormat.setFontWeight(QFont::Bold);
-
     const QString keywordOtherSpecialPatterns[] =
         {
             QStringLiteral("\\bfriend\\b"), QStringLiteral("\\boperator\\b"), QStringLiteral("\\bexplicit\\b"),
             QStringLiteral("\\breturn\\b")
         };
-
-    for (const QString &pattern : keywordOtherSpecialPatterns)
-    {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = OtherSpecialFormat;
-        HighHightingRules.append(rule);
-    }
-
-    PreProcessFormat.setForeground(Qt::darkGray);
-    PreProcessFormat.setFontWeight(QFont::Bold);
 
     const QString keywordPreProcessPatterns[] =
         {
@@ -88,6 +72,79 @@ HighLighter::HighLighter(QTextDocument *parent)
             QStringLiteral("\\#\\bpragma once\\b")
         };
 
+    const QString keywordSemilicon = QStringLiteral("\\;");
+
+    const QString keywordFunction = QStringLiteral("\\b(?!for\\b|while\\b)[A-Za-z0-9_]+(?=\\()");
+
+    const QString keywordQt = QStringLiteral("\\bQ[A-Za-z]+\\b");
+
+    const QString keywordQuotation = QStringLiteral("\".*\"");
+
+    const QString keywordTriangle = QStringLiteral("<.*>");
+
+    const QString keywordSingleLineComment = QStringLiteral("//[^\n]*");
+
+    if(_color_style)
+    {
+        TypeFormat.setForeground(Qt::darkBlue);
+
+        SpecialFormat.setForeground(Qt::darkBlue);
+        SpecialFormat.setFontWeight(QFont::Bold);
+
+        OtherSpecialFormat.setFontWeight(QFont::Bold);
+
+        SemiliconFormat.setForeground(Qt::black);
+
+        FunctionFormat.setForeground(Qt::darkYellow);
+
+        QtFormat.setForeground(Qt::darkBlue);
+        QtFormat.setFontWeight(QFont::Bold);
+    }
+    else
+    {
+        TypeFormat.setForeground(Qt::blue);
+
+        SpecialFormat.setForeground(Qt::green);
+        SpecialFormat.setFontWeight(QFont::Normal);
+
+        OtherSpecialFormat.setFontWeight(QFont::Normal);
+
+        SemiliconFormat.setForeground(Qt::white);
+
+        FunctionFormat.setForeground(Qt::yellow);
+
+        QtFormat.setForeground(Qt::darkBlue);
+        QtFormat.setFontWeight(QFont::Bold);
+    }
+
+    for (const QString &pattern : keywordTypePatterns)
+    {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = TypeFormat;
+        HighHightingRules.append(rule);
+    }
+
+    for (const QString &pattern : keywordBoolPatterns)
+    {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = BoolFormat;
+        HighHightingRules.append(rule);
+    }
+
+    for (const QString &pattern : keywordSpecialPatterns)
+    {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = SpecialFormat;
+        HighHightingRules.append(rule);
+    }
+
+    for (const QString &pattern : keywordOtherSpecialPatterns)
+    {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = OtherSpecialFormat;
+        HighHightingRules.append(rule);
+    }
+
     for (const QString &pattern : keywordPreProcessPatterns)
     {
         rule.pattern = QRegularExpression(pattern);
@@ -95,44 +152,31 @@ HighLighter::HighLighter(QTextDocument *parent)
         HighHightingRules.append(rule);
     }
 
-    SemiliconFormat.setForeground(Qt::black);
-    SemiliconFormat.setFontWeight(QFont::Bold);
-    rule.pattern = QRegularExpression(QStringLiteral("\\;"));
+    rule.pattern = QRegularExpression(keywordSemilicon);
     rule.format = SemiliconFormat;
     HighHightingRules.append(rule);
 
-    FunctionFormat.setForeground(Qt::darkYellow);
-    FunctionFormat.setFontItalic(true);
-    rule.pattern = QRegularExpression(QStringLiteral("\\b(?!for\\b|while\\b)[A-Za-z0-9_]+(?=\\()"));
+    rule.pattern = QRegularExpression(keywordFunction);
     rule.format = FunctionFormat;
     HighHightingRules.append(rule);
 
-    QtFormat.setFontWeight(QFont::Bold);
-    QtFormat.setForeground(Qt::darkBlue);
-    rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
+    rule.pattern = QRegularExpression(keywordQt);
     rule.format = QtFormat;
     HighHightingRules.append(rule);
 
-    QuotationFormat.setForeground(Qt::darkMagenta);
-    QuotationFormat.setFontItalic(true);
-    rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+    rule.pattern = QRegularExpression(keywordQuotation);
     rule.format = QuotationFormat;
     HighHightingRules.append(rule);
 
-    TriangleBracketsFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegularExpression(QStringLiteral("<.*>"));
+    rule.pattern = QRegularExpression(keywordTriangle);
     rule.format = TriangleBracketsFormat;
     HighHightingRules.append(rule);
 
-    SingleLineCommentFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
+    rule.pattern = QRegularExpression(keywordSingleLineComment);
     rule.format = SingleLineCommentFormat;
     HighHightingRules.append(rule);
 
-    MultiLineCommentFormat.setForeground(Qt::darkGreen);
-
-    commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
-    commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+    rehighlight();
 }
 
 void HighLighter::highlightBlock(const QString &text)
