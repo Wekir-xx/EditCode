@@ -9,15 +9,15 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    EditCode.cpp \
-    HighLighter.cpp \
-    TextEditObserver.cpp \
-    main.cpp
+    cpp/EditCode.cpp \
+    cpp/HighLighter.cpp \
+    cpp/TextEditObserver.cpp \
+    cpp/main.cpp
 
 HEADERS += \
-    EditCode.h \
-    HighLighter.h \
-    TextEditObserver.h
+    header/EditCode.h \
+    header/HighLighter.h \
+    header/TextEditObserver.h
 
 FORMS +=
 
@@ -27,4 +27,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    qrc.qrc
+    src/qrc.qrc

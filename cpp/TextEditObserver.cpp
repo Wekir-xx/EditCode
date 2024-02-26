@@ -1,8 +1,8 @@
-#include "TextEditObserver.h"
+#include "header/TextEditObserver.h"
 
 #include <QStringList>
 
-TextEditObserver::TextEditObserver(QTextEdit *edit_code, QTextEdit *number_code)
+TextEditObserver::TextEditObserver(QTextEdit* edit_code, QTextEdit* number_code)
     : _edit_code{edit_code},
     _number_code{number_code}
 {

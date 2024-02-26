@@ -9,5 +9,6 @@
         <file>images/black_theme/new.png</file>
         <file>images/black_theme/open.png</file>
         <file>images/black_theme/save.png</file>
+        <file>styles.qss</file>
     </qresource>
 </RCC>

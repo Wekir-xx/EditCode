@@ -1,8 +1,8 @@
 #ifndef EDITCODE_H
 #define EDITCODE_H
 
-#include <TextEditObserver.h>
-#include <HighLighter.h>
+#include <header/TextEditObserver.h>
+#include <header/HighLighter.h>
 
 #include <QWidget>
 #include <QString>

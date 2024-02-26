@@ -1,4 +1,4 @@
-#include "EditCode.h"
+#include "header/EditCode.h"
 
 #include <QVBoxLayout>
 #include <QMenu>
@@ -317,140 +317,37 @@ void EditCode::setStyleApp()
 
     if(_color_style)
     {
-        this->setStyleSheet("background-color: #FFFFFF;");
-        _menuBar->setStyleSheet("background-color: #DCDCDC;");
-        _file_bar->setStyleSheet("QMenu::item:selected{"
-                                "background-color: #C0C0C0;"
-                                "color: black;}");
-        _views_bar->setStyleSheet("QMenu::item:selected{"
-                                 "background-color: #C0C0C0;"
-                                 "color: black;}");
-        _name_file->setStyleSheet("font-size: 11pt;"
-                                  "font-weight: 550;"
-                                  "color: #000000;");
-        _edit_code->setStyleSheet("background-color: #FFFFFF;"
-                                  "font-size: 10pt;"
-                                  "font-weight: 450;");
-        _edit_code->verticalScrollBar()->setStyleSheet("QScrollBar{"
-                                                       "background-color: #FFFFFF;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #DCDCDC;}"
-                                                       "QScrollBar::handle{"
-                                                       "background-color: #D3D3D3;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #DCDCDC;}"
-                                                       "QScrollBar::handle:hover{"
-                                                       "background-color: #DCDCDC;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #C0C0C0;}"
-                                                       "QScrollBar::handle:pressed{"
-                                                       "background-color: #D3D3D3;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #DCDCDC;}");
-        _number_code->setStyleSheet("background-color: #FFFFFF;"
-                                    "font-size: 10pt;"
-                                    "font-weight: 500;");
-        _list_widget->setStyleSheet("background-color: #FFFFFF;"
-                                    "font-size: 10pt;"
-                                    "font-weight: 550;");
-        _But_Remove->setStyleSheet("QPushButton{"
-                                   "background-color: #DCDCDC;"
-                                   "font-size: 10pt;"
-                                   "font-weight: 500;}"
-                                   "QPushButton:hover{"
-                                   "background-color: #D3D3D3;}");
-        _But_All_Remove->setStyleSheet("QPushButton{"
-                                       "background-color: #DCDCDC;"
-                                       "font-size: 10pt;"
-                                       "font-weight: 500;}"
-                                       "QPushButton:hover{"
-                                       "background-color: #D3D3D3;}");
+        this->setObjectName("QMainWindowWhite");
+        _menuBar->setObjectName("QMenuBarWhite");
+        _file_bar->setObjectName("QMenuWhite");
+        _views_bar->setObjectName("QMenuWhite");
+        _name_file->setObjectName("QLabelWhite");
+        _number_code->setObjectName("QTextEditWhite");
+        _edit_code->setObjectName("QTextEditWhite");
+        _edit_code->verticalScrollBar()->setObjectName("QScrollBarWhite");
+        _list_widget->setObjectName("QListWidgetWhite");
+        _But_Remove->setObjectName("QPushButtonWhite");
+        _But_All_Remove->setObjectName("QPushButtonWhite");
     }
     else
     {
-        this->setStyleSheet("background-color: #474747;");
-        _menuBar->setStyleSheet("QMenuBar{"
-                                "background-color: #2b2b2b;"
-                                "color: #D3D3D3}"
-                                "QMenuBar::item:selected{"
-                                "background-color: #808080;"
-                                "border-width: 3px;"
-                                "border-style: solid;"
-                                "border-color: #696969;}"
-                                "QMenuBar::item:pressed{"
-                                "background-color: #696969;}");
-        _file_bar->setStyleSheet("QMenu{"
-                                 "background-color: #2b2b2b;"
-                                 "color: #D3D3D3;}"
-                                 "QMenu::item:selected{"
-                                 "background-color: #696969;"
-                                 "color: #D3D3D3;}");
-        _views_bar->setStyleSheet("QMenu{"
-                                  "background-color: #2b2b2b;"
-                                  "color: #D3D3D3;}"
-                                  "QMenu::item:selected{"
-                                  "background-color: #696969;"
-                                  "color: #D3D3D3;}");
-        _name_file->setStyleSheet("font-size: 11pt;"
-                                  "font-weight: 550;"
-                                  "color: #FFFFFF;");
-        _edit_code->setStyleSheet("background-color: #2b2b2b;"
-                                  "color: #D3D3D3;"
-                                  "font-size: 10pt;"
-                                  "font-weight: 450;");
-        _edit_code->verticalScrollBar()->setStyleSheet("QScrollBar{"
-                                                       "background-color: #000000;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #696969;}"
-                                                       "QScrollBar::handle{"
-                                                       "background-color: #424242;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #696969;}"
-                                                       "QScrollBar::handle:hover{"
-                                                       "background-color: #696969;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #808080;}"
-                                                       "QScrollBar::handle:pressed{"
-                                                       "background-color: #424242;"
-                                                       "border-width: 2px;"
-                                                       "border-style: solid;"
-                                                       "border-color: #696969;}");
-        _number_code->setStyleSheet("background-color: #2b2b2b;"
-                                    "color: #D3D3D3;"
-                                    "font-size: 10pt;"
-                                    "font-weight: 450;");
-        _list_widget->setStyleSheet("QListWidget{"
-                                    "background-color: #2b2b2b;"
-                                    "color: #D3D3D3;"
-                                    "font-size: 10pt;"
-                                    "font-weight: 550;}"
-                                    "QListWidget::item:pressed{"
-                                    "background-color: #424242;}"
-                                    "QListWidget::item:selected{"
-                                    "background-color: #696969;"
-                                    "color: #D3D3D3}");
-        _But_Remove->setStyleSheet("QPushButton{"
-                                   "background-color: #696969;"
-                                   "color: #c2c2c2;"
-                                   "font-size: 10pt;"
-                                   "font-weight: 500;}"
-                                   "QPushButton:hover{"
-                                   "background-color: #808080;}");
-        _But_All_Remove->setStyleSheet("QPushButton{"
-                                       "background-color: #696969;"
-                                       "color: #c2c2c2;"
-                                       "font-size: 10pt;"
-                                       "font-weight: 500;}"
-                                       "QPushButton:hover{"
-                                       "background-color: #808080;}");
+        this->setObjectName("QWidgetBlack");
+        _menuBar->setObjectName("QMenuBarBlack");
+        _file_bar->setObjectName("QMenuBlack");
+        _views_bar->setObjectName("QMenuBlack");
+        _name_file->setObjectName("QLabelBlack");
+        _number_code->setObjectName("QTextEditBlack");
+        _edit_code->setObjectName("QTextEditBlack");
+        _edit_code->verticalScrollBar()->setObjectName("QScrollBarBlack");
+        _list_widget->setObjectName("QListWidgetBlack");
+        _But_Remove->setObjectName("QPushButtonBlack");
+        _But_All_Remove->setObjectName("QPushButtonBlack");
     }
+
+    QFile file(":/styles.qss");
+    file.open(QIODevice::ReadOnly);
+    qApp->setStyleSheet(QLatin1String(file.readAll()));
+    file.close();
 }
 
 QString EditCode::GetNameFile(size_t number_file) const
