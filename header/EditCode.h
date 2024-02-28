@@ -17,6 +17,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QThread>
 
 class EditCode : public QWidget
 {
@@ -50,6 +51,10 @@ private:
 private:
     HighLighter* _lighter;
     TextEditObserver* _observer;
+
+private:
+    QThread* _thread_observer;
+    QThread* _thread_lighter;
 
 private:
     QVBoxLayout* _VLayout;

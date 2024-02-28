@@ -13,13 +13,16 @@ public:
     ~TextEditObserver();
 
 private slots:
-    void ChangeScroll();
+    void ChangeNumberScroll();
+    void ChangeCodeScroll();
     void ChangeCountString();
 
 private:
     QTextEdit* _edit_code;
     QTextEdit* _number_code;
     size_t _count_string{1};
+
+private:
     QScrollBar* _edit_scroll_bar;
     QScrollBar* _number_scroll_bar;
 };

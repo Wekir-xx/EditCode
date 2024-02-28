@@ -30,6 +30,11 @@ EditCode::EditCode(QWidget *parent)
 
     setFormApp();
     setStyleApp();
+
+    _thread_observer = new QThread();
+    connect(this, SIGNAL(destroyed()), _thread_observer, SLOT(quit()));
+    _observer->moveToThread(_thread_observer);
+    _thread_observer->start();
 }
 
 EditCode::~EditCode()
@@ -44,8 +49,6 @@ void EditCode::Run()
         NewFile();
     if(_path_file.isEmpty())
         return;
-
-    this->setEnabled(false);
 
     size_t time_index = _index;
     for(qint8 i {}; i < _path_file.size(); ++i)
@@ -73,13 +76,12 @@ void EditCode::Run()
     CMD(QStringList() << "/C" << "del" << "/f" << "/q" << main_file);
     CMD(compilation << "-o" << main_file);
     CMD(QStringList() << "/C" << "start" << main_file);
-
-    this->setEnabled(true);
 }
 
 void EditCode::NewFile()
 {
     this->setEnabled(false);
+    _menuBar->setEnabled(false);
 
     _dialog_newfile = new QDialog(this);
     _dialog_newfile->setFixedSize(360, 125);
@@ -116,13 +118,12 @@ void EditCode::NewFile()
 
 void EditCode::OpenFile()
 {
-    this->setEnabled(false);
-
     QString path_new_file = QFileDialog::getOpenFileName(this, tr("Open file"), "C:/", tr("cpp file (*.cpp);;h file (*.h);;hpp file (*.hpp)"));
 
     if(path_new_file.isEmpty())
     {
         this->setEnabled(true);
+        _menuBar->setEnabled(true);
         return;
     }
 
@@ -150,8 +151,6 @@ void EditCode::OpenFile()
     }
     else
         _name_file->setText("Not open file");
-
-    this->setEnabled(true);
 }
 
 void EditCode::SaveFile()
@@ -211,12 +210,14 @@ void EditCode::NewFile_Create(QString name_new_file)
 
     _dialog_newfile->deleteLater();
     this->setEnabled(true);
+    _menuBar->setEnabled(true);
 }
 
 void EditCode::NewFile_Cancel()
 {
     _dialog_newfile->deleteLater();
     this->setEnabled(true);
+    _menuBar->setEnabled(true);
 }
 
 void EditCode::SelectFile(QListWidgetItem *item)
@@ -461,48 +462,32 @@ void EditCode::CreateMenuBar()
     connect(save_file, &QAction::triggered, this, &EditCode::SaveFile);
     connect(run, &QAction::triggered, this, &EditCode::Run);
     connect(left_form, &QAction::triggered, this, [this](){
-        this->setEnabled(false);
-
         if(!_layout_form)
         {
             _layout_form = true;
             setFormApp();
         }
-
-        this->setEnabled(true);
     });
     connect(right_form, &QAction::triggered, this, [this](){
-        this->setEnabled(false);
-
         if(_layout_form)
         {
             _layout_form = false;
             setFormApp();
         }
-
-        this->setEnabled(true);
     });
     connect(standart_style, &QAction::triggered, this, [this](){
-        this->setEnabled(false);
-
         if(!_color_style)
         {
             _color_style = true;
             setStyleApp();
         }
-
-        this->setEnabled(true);
     });
     connect(black_style, &QAction::triggered, this, [this](){
-        this->setEnabled(false);
-
         if(_color_style)
         {
             _color_style = false;
             setStyleApp();
         }
-
-        this->setEnabled(true);
     });
 
     _file_bar = _menuBar->addMenu("File");
@@ -563,24 +548,16 @@ void EditCode::CreateMainApp()
     connect(_But_Remove, &QPushButton::pressed, this, [this](){
         if(remove_file != nullptr)
         {
-            _list_widget->setEnabled(false);
-
             Remove(remove_file->text());
 
             QListWidgetItem* item = _list_widget->takeItem(_list_widget->row(remove_file));
             delete item;
             remove_file = nullptr;
-
-            _list_widget->setEnabled(true);
         }
     });
     connect(_But_All_Remove, &QPushButton::pressed, this, [this](){
-        _list_widget->setEnabled(false);
-
         All_Remove();
         remove_file = nullptr;
-
-        _list_widget->setEnabled(true);
     });
 
     _HLayout = new QHBoxLayout{};
